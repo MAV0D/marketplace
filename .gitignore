@@ -1,0 +1,15 @@
+# Python (bytecode)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+db.sqlite3
+/app/media/
+.env
+
+# Docker
+.docker/
+
+# VS Code
+.vscode/

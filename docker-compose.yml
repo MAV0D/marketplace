@@ -1,0 +1,40 @@
+services:
+  web:
+    build: ./app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./app
+          target: ./app
+        - action: rebuild
+          path: requirements.txt
+
+    
+  db:
+    image: mysql:8.0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - db-data:/var/lib/mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: V0jcek
+      MYSQL_DATABASE: marketplace
+      MYSQL_USER: larp_admin
+      MYSQL_PASSWORD: V0jcek
+
+volumes:
+  db-data:
+  app:
