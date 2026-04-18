@@ -13,3 +13,5 @@ db.sqlite3
 
 # VS Code
 .vscode/
+
+app/*/migrations/__init__.py
