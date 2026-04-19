@@ -1,8 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}New Listing | Larp Marketplace{% endblock %}
+
+{% block content %}
 <h1>Larp Marketplace</h1>
 <ul>
     {% for listing in listings %}
-        <li><a href="{% url 'detail' id=listing.id%}">{{ listing.name }} - {{ listing.selling_price }} Kč</li>
+        <li><a href="{% url 'listing_detail' id=listing.id%}">{{ listing.name }} - {{ listing.selling_price }} Kč</li>
     {% empty %}
         <li>Unfortunately, there aren't any listing at the moment.</li>
     {% endfor %}
 </ul>
+
+<a href={% url 'create_listing' %}>New listing</a>
+{% endblock %}

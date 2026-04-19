@@ -1,3 +1,6 @@
 Django>=5.0
 mysqlclient
 django-cleanup
+Pillow
+dotenv
+gunicorn

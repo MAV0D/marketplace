@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Larp Marketplace{% endblock %}</title>
+    {% comment %} <script src="https://unpkg.com/htmx.org@1.9.10"></script> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="/static/style.css"> {% endcomment %}
+</head>
+<body>
+    <nav>
+        <a href="{% url 'index' %}">Home</a> | <a href="{% url 'create_listing' %}">Create listing</a>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Vojtech Zmatlo</p>
+    </footer>
+</body>
+</html>

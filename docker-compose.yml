@@ -1,22 +1,14 @@
 services:
   web:
     build: ./app
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "8000:8000"
     volumes:
       - ./app:/app
       - ./media:/app/media
-
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./app
-          target: ./app
-        - action: rebuild
-          path: requirements.txt
 
     
   db:
@@ -31,10 +23,10 @@ services:
       - db-data:/var/lib/mysql
 
     environment:
-      MYSQL_ROOT_PASSWORD: V0jcek
-      MYSQL_DATABASE: marketplace
-      MYSQL_USER: larp_admin
-      MYSQL_PASSWORD: V0jcek
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
 
 volumes:
   db-data:

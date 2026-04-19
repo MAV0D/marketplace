@@ -1,7 +1,39 @@
-<h1><a href="{% url 'index' %}">Larp Marketplace</a></h1>
-<h3>{{data.name}}</h3>
-<p>{{data.description}}</p>
-{% for image in data.images.all %}
-<img src="{{ image.file.url }}" alt="{{data.name}}" width="300" height="300">
-{% endfor %}
-<p>{{data.selling_price}}</p>
+{% extends "base.html" %}
+
+{% block title %}New Listing | Larp Marketplace{% endblock %}
+
+{% block content %}
+<div class="listing-detail">
+    <h2>{{ listing.name }}</h2>
+
+    <p><strong>Category:</strong> {{ listing.equipment_type.name }}</p>
+    <p><strong>Condition:</strong> {{ listing.get_condition_display }}</p>
+    <p><strong>Description:</strong> {{ listing.description }}</p>
+
+    <hr>
+
+    {% if listing.for_sale %}
+        <p><strong>Sale Price:</strong> {{ listing.selling_price }} CZK</p>
+    {% endif %}
+
+    {% if listing.for_rent %}
+        <p><strong>Renting Price:</strong> {{ listing.renting_price }} CZK</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Images:</h3>
+    {% for image in listing.images.all %}
+        <img src="{{ image.file.url }}" alt="{{listing.name}}" style="width: 150px; margin-right: 10px;">
+    {% empty %}
+        <p>No images uploaded.</p>
+    {% endfor %}
+
+    <hr>
+
+    <h3>Details:</h3>
+    {% for attr in listing.listingattribute_set.all %}
+        <p><strong>{{ attr.value.attribute.name }}:</strong> {{ attr.value.value }}</p>
+    {% endfor %}
+</div>
+{% endblock %}

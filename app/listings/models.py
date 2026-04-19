@@ -1,5 +1,4 @@
 from django.db import models
-import datetime
 from users.models import User
 
 # Create your models here.
@@ -8,12 +7,15 @@ class EquipmentType(models.Model):
   name = models.CharField(max_length=20)
   description = models.TextField()
   parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+  filter_options = models.ManyToManyField('FilterAttribute')
   
   def __str__(self):
     return self.name
   
   def get_full_path(self):
-    return f"{self.parent.get_full_path() if self.parent != None else ""}/{self.slug}"
+    if self.parent:
+        return f"{self.parent.get_full_path()}/{self.slug}"
+    return f"/{self.slug}"
 
 
 class Listing(models.Model):
@@ -41,7 +43,7 @@ class Listing(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)
   last_edited_at = models.DateTimeField(auto_now=True)
   seller = models.ForeignKey(User, on_delete=models.CASCADE)
-  equipment_type = models.ForeignKey(EquipmentType, on_delete=models.PROTECT)
+  equipment_type = models.ForeignKey('EquipmentType', on_delete=models.PROTECT)
   
   def archive_listing(self):
     self.status = self.Status.ARCHIVED
@@ -54,3 +56,25 @@ class Listing(models.Model):
   
   def __str__(self):
     return self.name
+  
+class FilterAttribute(models.Model):
+  name = models.CharField(max_length=20)
+  is_numeric = models.BooleanField(default=False)
+  
+  def __str__(self):
+    return self.name
+  
+class FilterValue(models.Model):
+  value = models.CharField(max_length=20)
+  numeric_value = models.FloatField(null=True, blank=True)
+  attribute = models.ForeignKey('FilterAttribute', on_delete=models.CASCADE)
+  
+  def __str__(self):
+    return self.value
+  
+class ListingAttribute(models.Model):
+  listing = models.ForeignKey('Listing', on_delete=models.CASCADE, related_name='attributes')
+  value = models.ForeignKey('FilterValue', on_delete=models.CASCADE)
+  
+  def __str__(self):
+    return f"{str(self.value.attribute)} - {self.value}"
