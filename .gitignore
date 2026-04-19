@@ -5,7 +5,6 @@ __pycache__/
 
 # Django
 db.sqlite3
-/app/media/
 .env
 
 # Docker
@@ -15,3 +14,5 @@ db.sqlite3
 .vscode/
 
 app/*/migrations/__init__.py
+
+media/

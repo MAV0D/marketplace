@@ -51,3 +51,6 @@ class Listing(models.Model):
     
   def addPicture(self, file):
     pass
+  
+  def __str__(self):
+    return self.name

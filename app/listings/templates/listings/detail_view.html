@@ -1,4 +1,7 @@
 <h1><a href="{% url 'index' %}">Larp Marketplace</a></h1>
 <h3>{{data.name}}</h3>
 <p>{{data.description}}</p>
+{% for image in data.images.all %}
+<img src="{{ image.file.url }}" alt="{{data.name}}" width="300" height="300">
+{% endfor %}
 <p>{{data.selling_price}}</p>
