@@ -9,6 +9,8 @@ services:
     volumes:
       - ./app:/app
       - ./media:/app/media
+    ports:
+      - "8000:8000"
 
     
   db:

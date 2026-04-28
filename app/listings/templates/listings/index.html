@@ -6,11 +6,10 @@
 <h1>Larp Marketplace</h1>
 <ul>
     {% for listing in listings %}
-        <li><a href="{% url 'listing_detail' id=listing.id%}">{{ listing.name }} - {{ listing.selling_price }} Kč</li>
+        <li><a href="{% url 'listing_detail' id=listing.id%}"><b>{{ listing.equipment_type.name }}:</b> {{ listing.name }} - {{ listing.selling_price }} Kč</a></li>
     {% empty %}
         <li>Unfortunately, there aren't any listing at the moment.</li>
     {% endfor %}
 </ul>
 
-<a href={% url 'create_listing' %}>New listing</a>
 {% endblock %}
