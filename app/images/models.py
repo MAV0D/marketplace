@@ -8,12 +8,11 @@ def get_upload_path(instance, filename : str):
     ext = filename.split('.')[-1]
     
     if hasattr(instance, 'listing'):
-        name = f"img_{instance.position}"
-        return os.path.join('listings', slugify(instance.listing.name), f"{name}.{ext}")
-    
+      name = f"img_{instance.position}"
+      return os.path.join('listings', slugify(instance.listing.name), f"{name}.{ext}")
+  
     elif hasattr(instance, 'user'):
-        import datetime
-        return os.path.join('profiles', slugify(instance.user.username), f"profile_picture.{ext}")
+      return os.path.join('profiles', slugify(instance.user.username), f"profile_picture.{ext}")
     
     return os.path.join('others', filename)
 

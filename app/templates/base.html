@@ -3,12 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Larp Marketplace{% endblock %}</title>
-    {% comment %} <script src="https://unpkg.com/htmx.org@1.9.10"></script> {% endcomment %}
-    {% comment %} <link rel="stylesheet" href="/static/style.css"> {% endcomment %}
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous"></script>
 </head>
 <body>
     <nav>
-        <a href="{% url 'index' %}">Home</a> | <a href="{% url 'create_listing' %}">Create listing</a>
+        <a href="{% url 'index' %}">Home</a> | <a href="{% url 'create_listing' %}">Create listing</a> | 
+        {% if user.is_authenticated %}
+            <span>Hello, {{ user.username }}!</span>
+            
+            <!-- Formulář pro bezpečné odhlášení přes POST -->
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">
+                    Logout
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+    </form>
     </nav>
 
     <main>

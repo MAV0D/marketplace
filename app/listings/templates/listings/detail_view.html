@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}New Listing | Larp Marketplace{% endblock %}
+{% block title %}{{ listing.name }} | Larp Marketplace{% endblock %}
 
 {% block content %}
 <div class="listing-detail">
@@ -35,5 +35,8 @@
     {% for attr in listing.listingattribute_set.all %}
         <p><strong>{{ attr.value.attribute.name }}:</strong> {{ attr.value.value }}</p>
     {% endfor %}
+
+    <a href="{% url 'edit_listing' listing.id %}">Edit</a>
+
 </div>
 {% endblock %}

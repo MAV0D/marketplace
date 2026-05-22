@@ -8,13 +8,12 @@ class MultipleFileInput(forms.ClearableFileInput):
 
 class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput(attrs={'accept': 'image/*'})) # Přidáno omezení pro prohlížeč
+        kwargs.setdefault("widget", MultipleFileInput(attrs={'accept': 'image/*'}))
         super().__init__(*args, **kwargs)
 
     def clean(self, data, initial=None):
         single_file_clean = super().clean
         if isinstance(data, (list, tuple)):
-            # Validace velikosti (např. max 5MB na soubor)
             MAX_UPLOAD_SIZE = 5 * 1024 * 1024
             
             result = []
@@ -22,15 +21,13 @@ class MultipleFileField(forms.FileField):
                 if d.size > MAX_UPLOAD_SIZE:
                     raise ValidationError(f"Soubor {d.name} je příliš velký. Maximum je 5MB.")
                 
-                # Tato část zajistí, že každý soubor je skutečně obrázek
-                # (Django interně zkusí otevřít soubor pomocí Pillow)
                 res = single_file_clean(d, initial)
                 result.append(res)
         else:
             result = single_file_clean(data, initial)
         return result
 
-class NewListingForm(forms.ModelForm):
+class ListingForm(forms.ModelForm):
   images = MultipleFileField(label="Photos", required=False)
   
   class Meta:

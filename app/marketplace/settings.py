@@ -129,14 +129,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-FORCE_SCRIPT_NAME = '/marketplace'
+FORCE_SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', None)
 
-STATIC_URL = '/marketplace/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Sem Django sesbírá CSS/JS pro Nginx
-
+if FORCE_SCRIPT_NAME:
+    STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
+    MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
+else:
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
 
 MEDIA_URL = '/marketplace/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if not DEBUG:
     CSRF_TRUSTED_ORIGINS = ['https://server2.zmatlo.cz']
+
+LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
