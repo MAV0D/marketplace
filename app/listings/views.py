@@ -7,11 +7,6 @@ from .models import Listing
 from .forms import ListingForm
 from images.models import ListingImage
 
-# Create your views here.
-def index(request):
-  listings = Listing.objects.all()
-  return render(request, 'listings/index.html', {'listings' : listings})
-
 def detail(request, id):
   listing = get_object_or_404(Listing, id = id)
   return render(request, "listings/detail_view.html", {'listing' : listing})

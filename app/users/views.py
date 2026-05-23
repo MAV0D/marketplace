@@ -134,15 +134,4 @@ def upload_profile_picture(request):
     profile_pic_instance.refresh_from_db()
     form = ProfilePictureForm(instance=profile_pic_instance)
   
-  print("\n====== DATA PRO TEMPLATE ======")
-  if form.instance and form.instance.pk:
-    print(f"Instance ProfilePicture existuje (ID: {form.instance.pk})")
-    print(f"Cesta k souboru v DB: {form.instance.file}")
-    if form.instance.file:
-      print(f"URL adresa obrázku: {form.instance.file.url}")
-  else:
-    print("Instance ProfilePicture je prázdná (neexistuje v DB)")
-
-  print(f"Hodnota pole 'file' ve formuláři: {form['file'].value()}")
-  print("===============================\n")
   return render(request, 'users/partials/profile_picture_snippet.html', {'pic_form': form})

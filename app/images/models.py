@@ -9,7 +9,7 @@ def get_upload_path(instance, filename : str):
   
   if hasattr(instance, 'listing'):
     name = f"img_{instance.position}"
-    return os.path.join('listings', slugify(instance.listing.name), f"{name}.{ext}")
+    return os.path.join('listings', slugify(str(instance.listing.id)), f"{name}.{ext}")
 
   elif hasattr(instance, 'user'):
     return os.path.join('profiles', slugify(instance.user.username), f"profile_picture.{ext}")
@@ -56,5 +56,5 @@ def delete_empty_folders(sender, instance, **kwargs):
           os.remove(instance.file.path)
         
         os.rmdir(folder_path)
-  except Exception as e:
+  except Exception:
     pass
