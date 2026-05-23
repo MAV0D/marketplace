@@ -17,7 +17,7 @@ def get_upload_path(instance, filename : str):
   return os.path.join('others', filename)
 
 class Image(models.Model):
-  file = models.ImageField(upload_to=get_upload_path)
+  file = models.ImageField(upload_to=get_upload_path, blank=True)
   uploaded_at = models.DateTimeField(auto_now_add=True)
   
   class Meta:

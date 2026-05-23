@@ -6,7 +6,10 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, UserProfileForm
+from django.views.decorators.http import require_POST
+from django.contrib.auth.hashers import check_password
+from django.http import HttpResponse
+from .forms import CustomUserCreationForm, UserProfileForm, ProfilePicture, ProfilePictureForm
 
 User = get_user_model()
 
@@ -55,17 +58,91 @@ def activate_account(request, uidb64, token):
   
 @login_required
 def edit_profile(request):
+  
+  profile_pic_instance, created = ProfilePicture.objects.get_or_create(user=request.user)
+  
   if request.method == 'POST':
-    form = UserProfileForm(request.POST, instance=request.user)
-    if form.is_valid():
-      form.save()
-      messages.success(request, 'Your profile was successfully updatesd..')
+    user_form = UserProfileForm(request.POST, instance=request.user)
+    pic_form = ProfilePictureForm(request.POST, request.FILES, instance=profile_pic_instance)
+    if 'file-clear' in request.POST:
+      profile_pic_instance.delete()
+      messages.success(request, 'Your profile picture was successfully removed.')
+    
+    if user_form.is_valid() and pic_form.is_valid():
+      user_form.save()
+      if 'file' in request.FILES:
+        pic_form.save()
+      messages.success(request, 'Your profile was successfully updated.')
       return redirect('edit_profile')
-  else:
-    form = UserProfileForm(instance=request.user)
-      
-  return render(request, 'users/edit_profile.html', {'form': form})
 
+  else:
+    user_form = UserProfileForm(instance=request.user)
+    pic_form = ProfilePictureForm(instance=profile_pic_instance)
+      
+  return render(request, 'users/edit_profile.html', {'user_form': user_form, 'pic_form' : pic_form})    
+    
 def view_profile(request, id):
   user = get_object_or_404(User, id = id)
   return render(request, "users/view_profile.html", {'user' : user})
+
+
+@login_required
+@require_POST
+def delete_profile(request, id):
+  user = get_object_or_404(User, id=id)
+  
+  password = request.POST.get('delete_confirmation_password')
+
+  
+  if request.user and not check_password(password, request.user.password):
+    messages.error(request, 'Wrong password. Try again.')
+    return redirect('edit_profile')
+  
+  if user == request.user or request.user.is_staff:
+    user.is_active = False
+    user.status = User.UserStatus.DELETED
+    user.save()
+    messages.success(request, "Profile deleted successfully.")
+  else:
+    messages.error(request, 'You can\'t delete other accounts.')
+  
+  return redirect('index')
+
+@login_required
+@require_POST
+def delete_profile_picture(request):
+  try:
+    profile_pic = ProfilePicture.objects.get(user=request.user)
+    profile_pic.delete()
+  except ProfilePicture.DoesNotExist:
+    pass
+    
+  # Vytvoříme čistý prázdný formulář pro snippet
+  empty_form = ProfilePictureForm()
+  return render(request, 'users/partials/profile_picture_snippet.html', {'pic_form': empty_form})
+
+@login_required
+@require_POST
+def upload_profile_picture(request):
+  
+  profile_pic_instance, created = ProfilePicture.objects.get_or_create(user=request.user)
+  
+  form = ProfilePictureForm(request.POST, request.FILES, instance=profile_pic_instance)
+  
+  if form.is_valid():
+    form.save()
+    profile_pic_instance.refresh_from_db()
+    form = ProfilePictureForm(instance=profile_pic_instance)
+  
+  print("\n====== DATA PRO TEMPLATE ======")
+  if form.instance and form.instance.pk:
+    print(f"Instance ProfilePicture existuje (ID: {form.instance.pk})")
+    print(f"Cesta k souboru v DB: {form.instance.file}")
+    if form.instance.file:
+      print(f"URL adresa obrázku: {form.instance.file.url}")
+  else:
+    print("Instance ProfilePicture je prázdná (neexistuje v DB)")
+
+  print(f"Hodnota pole 'file' ve formuláři: {form['file'].value()}")
+  print("===============================\n")
+  return render(request, 'users/partials/profile_picture_snippet.html', {'pic_form': form})

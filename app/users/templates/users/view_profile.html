@@ -6,12 +6,22 @@
 <div class="profile-container" style="max-width: 600px; margin: 20px; font-family: sans-serif;">
     <h2>{{ user.username }}</h2>
     
+    <div class="profile-avatar">
+        {% if user.profile_picture and user.profile_picture.file %}
+            <img src="{{ user.profile_picture.file.url }}" alt="{{ user.username }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+            <div style="width: 150px; height: 150px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #fff;">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+        {% endif %}
+    </div>
+
     <p><strong>E-mail:</strong> {{ user.email }}</p>
     
     <p><strong>Sellers bio:</strong></p>
     <div style="background: #f4f4f4; padding: 15px; border-radius: 4px; min-height: 50px;">
-        {% if user.bio %}
-            {{ user.bio|linebreaks }}
+        {% if user.profile_description %}
+            {{ user.profile_description|linebreaks }}
         {% endif %}
     </div>
     
