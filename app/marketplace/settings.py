@@ -36,43 +36,43 @@ ALLOWED_HOSTS = ['server2.zmatlo.cz', 'localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'listings',
-    'users',
-    'images',
-    'django_cleanup.apps.CleanupConfig',
+  'django.contrib.admin',
+  'django.contrib.auth',
+  'django.contrib.contenttypes',
+  'django.contrib.sessions',
+  'django.contrib.messages',
+  'django.contrib.staticfiles',
+  'listings',
+  'users',
+  'images',
+  'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+  'django.middleware.security.SecurityMiddleware',
+  'django.contrib.sessions.middleware.SessionMiddleware',
+  'django.middleware.common.CommonMiddleware',
+  'django.middleware.csrf.CsrfViewMiddleware',
+  'django.contrib.auth.middleware.AuthenticationMiddleware',
+  'django.contrib.messages.middleware.MessageMiddleware',
+  'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'marketplace.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
+  {
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [BASE_DIR / 'templates'],
+    'APP_DIRS': True,
+    'OPTIONS': {
+      'context_processors': [
+        'django.template.context_processors.request',
+        'django.contrib.auth.context_processors.auth',
+        'django.contrib.messages.context_processors.messages',
+      ],
     },
+  },
 ]
 
 WSGI_APPLICATION = 'marketplace.wsgi.application'
@@ -82,14 +82,14 @@ WSGI_APPLICATION = 'marketplace.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        "NAME": DB_NAME,
-        "USER": DB_USER,
-        "PASSWORD": DB_PASSWORD,
-        "HOST": "db",
-        "PORT": "3306",
-    }
+  'default': {
+    'ENGINE': 'django.db.backends.mysql',
+    "NAME": DB_NAME,
+    "USER": DB_USER,
+    "PASSWORD": DB_PASSWORD,
+    "HOST": "db",
+    "PORT": "3306",
+  }
 }
 
 
@@ -99,18 +99,18 @@ DATABASES = {
 AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+  {
+    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+  },
+  {
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+  },
+  {
+    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+  },
+  {
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+  },
 ]
 
 
@@ -132,19 +132,27 @@ USE_TZ = True
 FORCE_SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', None)
 
 if FORCE_SCRIPT_NAME:
-    STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
-    MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
+  STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
+  MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
 else:
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
+  STATIC_URL = '/static/'
+  MEDIA_URL = '/media/'
+
+STATICFILES_DIRS = [
+  os.path.join(BASE_DIR, 'static'),
+]
 
 MEDIA_URL = '/marketplace/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if not DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['https://server2.zmatlo.cz']
+  CSRF_TRUSTED_ORIGINS = ['https://server2.zmatlo.cz']
 
 LOGIN_URL = 'login'
 
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
+
+if DEBUG:
+  EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+  DEFAULT_FROM_EMAIL = 'noreply@muj-marketplace.cz'

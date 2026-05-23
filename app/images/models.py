@@ -5,16 +5,16 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
 def get_upload_path(instance, filename : str):
-    ext = filename.split('.')[-1]
-    
-    if hasattr(instance, 'listing'):
-      name = f"img_{instance.position}"
-      return os.path.join('listings', slugify(instance.listing.name), f"{name}.{ext}")
+  ext = filename.split('.')[-1]
   
-    elif hasattr(instance, 'user'):
-      return os.path.join('profiles', slugify(instance.user.username), f"profile_picture.{ext}")
-    
-    return os.path.join('others', filename)
+  if hasattr(instance, 'listing'):
+    name = f"img_{instance.position}"
+    return os.path.join('listings', slugify(instance.listing.name), f"{name}.{ext}")
+
+  elif hasattr(instance, 'user'):
+    return os.path.join('profiles', slugify(instance.user.username), f"profile_picture.{ext}")
+  
+  return os.path.join('others', filename)
 
 class Image(models.Model):
   file = models.ImageField(upload_to=get_upload_path)
@@ -30,13 +30,13 @@ class ListingImage(Image):
   listing = models.ForeignKey('listings.Listing', on_delete=models.CASCADE, related_name='images')
   
   def __str__(self):
-     return f"{slugify(self.listing.name)}-{self.position}"
+    return f"{slugify(self.listing.name)}-{self.position}"
   
 class ProfilePicture(Image):
   user = models.OneToOneField('users.User', on_delete=models.CASCADE, related_name='profile_picture')  
   
   def __str__(self):
-     return f"{slugify(self.user.username)}"
+    return f"{slugify(self.user.username)}"
 
 
 @receiver(post_delete, sender=ListingImage)
