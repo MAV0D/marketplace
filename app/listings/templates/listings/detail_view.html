@@ -6,9 +6,10 @@
 <div class="listing-detail">
     <h2>{{ listing.name }}</h2>
 
-    <p><strong>Category:</strong> {{ listing.equipment_type.name }}</p>
-    <p><strong>Condition:</strong> {{ listing.get_condition_display }}</p>
-    <p><strong>Description:</strong> {{ listing.description }}</p>
+    <p><strong>Category:</strong>{{ listing.equipment_type.name }}</p>
+    <p><strong>Condition:</strong>{{ listing.get_condition_display }}</p>
+    <p><strong>Description:</strong>{{ listing.description }}</p>
+    <strong>Seller:</strong><a href="{% url 'view_profile' id=listing.seller.id%}">{{ listing.seller }}</a></p>
 
     <hr>
 
@@ -36,7 +37,17 @@
         <p><strong>{{ attr.value.attribute.name }}:</strong> {{ attr.value.value }}</p>
     {% endfor %}
 
-    <a href="{% url 'edit_listing' listing.id %}">Edit</a>
-
+    {% if listing.seller == user %}
+        <a href="{% url 'edit_listing' listing.id %}">Edit</a>
+    {% endif %}
+    
+    {% if listing.seller == user %}
+        <form action="{% url 'delete_listing' listing.id %}" method="post" onsubmit="return confirm('Are you sure? This action is irreversible. ');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+            Delete
+            </button>
+        </form>
+    {% endif %}
 </div>
 {% endblock %}

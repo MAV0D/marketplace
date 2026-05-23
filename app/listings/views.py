@@ -1,5 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
+from django.contrib import messages
 from .models import Listing
 from .forms import ListingForm
 from images.models import ListingImage
@@ -39,6 +42,10 @@ def create_listing(request):
 
 def edit_listing(request, id):
   listing = get_object_or_404(Listing, id=id)
+  
+  if listing.seller != request.user:
+      raise PermissionDenied
+    
   if request.method == "POST":
     form = ListingForm(request.POST, request.FILES, instance=listing)
     if form.is_valid():
@@ -65,3 +72,17 @@ def edit_listing(request, id):
     'form': form, 
     "listing":listing
   })
+
+
+@login_required
+@require_POST
+def delete_listing(request, id):
+  listing = get_object_or_404(Listing, id=id)
+  
+  if listing.seller != request.user:
+    raise PermissionDenied
+  
+  listing.delete()
+  
+  messages.success(request, "Inzerát byl úspěšně smazán.")
+  return redirect('index')

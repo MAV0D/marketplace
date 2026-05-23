@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Insert new listing</h1>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         
