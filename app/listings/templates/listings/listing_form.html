@@ -3,13 +3,23 @@
 {% block title %}New Listing | Larp Marketplace{% endblock %}
 
 {% block content %}
-    <h1>Insert new listing</h1>
-    <form method="post">
+    <h1>{% if listing.name == '' %}Create new listing{%else%}Edit listing{%endif%}</h1>
+    <form method="post", enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         
+        <div id="listing-images-area" class="listing-images-section" style="margin-top: 20px; margin-bottom: 20px;">
+            {% include "listings/partials/listing_images_snippet.html" %}
+        </div>
+
         <div id="dynamic-attributes"></div>
         
-        <button type="submit">Submit</button>
+        <button type="submit">{% if listing.name == '' %}Publish listing{%else%}Save{%endif%}</button>
     </form>
 {% endblock %}
+
+{% comment %} <label>
+  <input type="checkbox" id="id_for_rent" name="for_rent" 
+         onchange="document.getElementById('id_rent_price').disabled = !this.checked;">
+  Nabízet k pronájmu
+</label> {% endcomment %}

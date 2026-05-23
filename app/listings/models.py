@@ -26,24 +26,25 @@ class Listing(models.Model):
     DAMAGED = 'DAMAGED', 'Damaged'
     
   class Status(models.TextChoices):
+    DRAFT = 'DRAFT', 'Draft'
     VISIBLE = 'VISIBLE', 'Visible'
     HIDDEN = 'HIDDEN', 'Hidden'
     SOLD = 'SOLD', 'Sold'
     ARCHIVED = 'ARCHIVED', 'Archived'
   
   name = models.CharField(max_length=20)
-  description = models.TextField()
+  description = models.TextField(null=True)
   for_rent = models.BooleanField()
   for_sale = models.BooleanField()
   selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
   renting_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-  condition = models.CharField(max_length=10, choices=Condition.choices)
+  condition = models.CharField(max_length=10, choices=Condition.choices, null=True)
   views_count = models.IntegerField(default=0)
-  status = models.CharField(max_length=10, choices=Status.choices)
+  status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
   created_at = models.DateTimeField(auto_now_add=True)
   last_edited_at = models.DateTimeField(auto_now=True)
   seller = models.ForeignKey(User, on_delete=models.CASCADE)
-  equipment_type = models.ForeignKey('EquipmentType', on_delete=models.PROTECT)
+  equipment_type = models.ForeignKey('EquipmentType', on_delete=models.PROTECT, null=True)
   
   def archive_listing(self):
     self.status = self.Status.ARCHIVED

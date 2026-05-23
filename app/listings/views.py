@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.http import HttpResponse
 from .models import Listing
 from .forms import ListingForm
 from images.models import ListingImage
@@ -13,27 +14,32 @@ def detail(request, id):
 
 @login_required
 def create_listing(request):
+  listing, created = Listing.objects.get_or_create(
+      seller=request.user,
+      status=Listing.Status.DRAFT,
+      defaults={
+        'name': '',
+        'description': '',
+        'for_rent' : False,
+        'for_sale' : False,
+        'seller' : request.user,
+      }
+    )
+  
   if request.method == 'POST':
-    form = ListingForm(request.POST, request.FILES)
+    form = ListingForm(request.POST, request.FILES, instance=listing)
     if form.is_valid():
       listing = form.save(commit=False)
       listing.seller = request.user
+      listing.status = Listing.Status.VISIBLE
       listing.save()
-
-      files = request.FILES.getlist('images')
-      for f in files:
-        ListingImage.objects.create(
-          listing=listing,
-          file=f,
-          is_main=False
-        )
       
       return redirect('listing_detail', id=listing.id)
 
   else:
-    form = ListingForm()
+    form = ListingForm(instance=listing)
     
-  return render(request, 'listings/listing_form.html', {'form': form})
+  return render(request, 'listings/listing_form.html', {'form': form, 'listing' : listing})
 
 def edit_listing(request, id):
   listing = get_object_or_404(Listing, id=id)
@@ -81,3 +87,38 @@ def delete_listing(request, id):
   
   messages.success(request, "Inzerát byl úspěšně smazán.")
   return redirect('index')
+
+@login_required
+@require_POST
+def delete_listing_image(request, id):
+
+  try:
+    image = get_object_or_404(ListingImage, id=id, listing__seller=request.user)
+    image.delete()
+  except ListingImage.DoesNotExist:
+    pass
+  
+  return HttpResponse("")
+
+@login_required
+@require_POST
+def upload_listing_images(request, listing_id):
+  listing = get_object_or_404(Listing, id=listing_id, seller=request.user)
+  files = request.FILES.getlist('images')
+  
+  if files:
+    last_image = listing.images.order_by('-position').first()
+    current_position = last_image.position if last_image else 0
+    
+    for f in files:
+      
+      current_position += 1
+      
+      ListingImage.objects.create(
+        listing=listing,
+        file=f,
+        position=current_position,
+        is_main=(current_position == 1)
+      )
+  
+  return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
