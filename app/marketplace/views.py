@@ -51,7 +51,7 @@ def index(request):
     )
 
   # PAGINATION ENGINE: Split total listings into chunks of 20 items per page
-  paginator = Paginator(listings, 8)
+  paginator = Paginator(listings, 20)
   page_number = request.GET.get('page', 1)
   
   try:
