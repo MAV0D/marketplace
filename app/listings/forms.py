@@ -51,10 +51,18 @@ class ListingForm(forms.ModelForm):
     sale_price = cleaned_data.get('selling_price')
     
     if not for_rent and not for_sale:
-      self.add_error('renting_price', "You must choose at least one option.")
+      self.add_error('for_rent', "You must choose at least one option.")
       
     if for_rent and not rent_price:
       self.add_error('renting_price', "You must enter renting price.")
       
     if for_sale and not sale_price:
       self.add_error('selling_price', "You must enter selling price.")
+      
+    has_db_images = self.instance.pk and self.instance.images.exists()
+    has_uploaded_images = bool(self.files.getlist('images'))
+
+    if not has_db_images and not has_uploaded_images:
+      raise forms.ValidationError("You must upload at least one image before your listing can be saved or published.")
+      
+    return cleaned_data

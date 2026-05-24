@@ -45,6 +45,7 @@ INSTALLED_APPS = [
   'listings',
   'users',
   'images',
+  'transactions',
   'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -156,3 +157,5 @@ LOGOUT_REDIRECT_URL = 'index'
 if DEBUG:
   EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
   DEFAULT_FROM_EMAIL = 'noreply@muj-marketplace.cz'
+  
+PASSWORD_RESET_TIMEOUT = 86400

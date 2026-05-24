@@ -52,11 +52,19 @@ class Listing(models.Model):
   def calculatePrice(self, days):
     return self.renting_price * days
     
-  def addPicture(self, file):
-    pass
-  
   def __str__(self):
     return self.name
+  
+  @property
+  def main_image(self):
+    """Vrátí hlavní obrázek inzerátu, případně první dostupný, nebo None"""
+    # 1. Pokusíme se najít obrázek s příznakem is_main
+    main_img = self.images.filter(is_main=True).first()
+    if main_img:
+      return main_img
+      
+    # 2. Záloha: Pokud z nějakého důvodu is_main chybí, vezmeme první obrázek v pořadí
+    return self.images.first()
   
 class FilterAttribute(models.Model):
   name = models.CharField(max_length=20)

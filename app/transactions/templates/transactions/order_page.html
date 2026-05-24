@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Order | {{ listing.name }} | Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+  <div class="bg-larp-brown p-8 rounded-lg border border-larp-copper/20 shadow-2xl">
+    
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-wide">Placing Order</h2>
+      <p class="text-xs text-larp-light/60 mt-2">
+        You are placing an order to <span class="text-larp-gold font-semibold">{% if order_type %}rent{% else %}buy{% endif %}</span> 
+        <span class="text-larp-light font-semibold block mt-0.5">{{ listing.name }}</span>
+      </p>
+    </div>
+
+    <form method="post" action="" class="space-y-6">
+      {% csrf_token %}
+
+      {% if order_type %}
+        <div class="space-y-2">
+          <label for="date_range" class="block text-sm font-medium text-larp-light">Choose Date Range</label>
+          <input type="text" id="date_range" name="date_range" placeholder="Select start and end dates..." required
+                 class="bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md px-3 py-2 w-full focus:outline-none focus:border-larp-gold transition-colors text-sm">
+        </div>
+
+        <script>
+          flatpickr("#date_range", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            allowInput: true,
+            "locale": {
+              "firstDayOfWeek": 1
+            }
+          });
+        </script>
+      {% endif %}
+
+      <button type="submit" class="w-full bg-larp-gold text-larp-dark hover:bg-larp-light font-bold text-sm uppercase py-3 rounded shadow tracking-wider transition-colors duration-200">
+        Confirm Order
+      </button>
+    </form>
+
+    <div class="mt-6 pt-6 border-t border-larp-light/10 text-center">
+      <a href="{% url 'view_profile' id=listing.seller.id %}" class="text-xs text-larp-light/50 hover:text-larp-gold transition-colors">
+        Cancel and go back
+      </a>
+    </div>
+    
+  </div>
+</div>
+{% endblock %}

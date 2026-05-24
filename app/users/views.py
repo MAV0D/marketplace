@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -8,8 +8,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import check_password
-from django.http import HttpResponse
 from .forms import CustomUserCreationForm, UserProfileForm, ProfilePicture, ProfilePictureForm
+from listings.models import Listing
+from images.models import ListingImage
 
 User = get_user_model()
 
@@ -83,7 +84,8 @@ def edit_profile(request):
     
 def view_profile(request, id):
   user = get_object_or_404(User, id = id)
-  return render(request, "users/view_profile.html", {'user' : user})
+  listings = Listing.objects.filter(seller=user, status=Listing.Status.VISIBLE)
+  return render(request, "users/view_profile.html", {'user' : user, 'listings':listings})
 
 
 @login_required

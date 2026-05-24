@@ -1,33 +1,82 @@
-<h4>Listing Images</h4>
+<h4 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider mb-4">Attached Images</h4>
 
-<div class="listing-images-gallery" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
-  {% for img in listing.images.all %}
-    <div id="listing-image-{{ img.id }}" style="position: relative; width: 100px; height: 100px;">
-      <img src="{{ img.file.url }}?t={{ img.uploaded_at|date:'U' }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid #ccc;">
+<div id="image-error-message" class="empty:hidden mb-4"></div>
+
+<div class="listing-images-gallery flex flex-wrap gap-4 mb-6">
+  {% for img in listing.images.all|dictsort:"position" %}
+    <div id="listing-image-{{ img.id }}" class="relative w-28 h-28 bg-larp-dark rounded border {% if img.is_main %}border-larp-gold shadow-[0_0_8px_rgba(212,175,55,0.25)]{% else %}border-larp-copper/30{% endif %} overflow-hidden group">
       
-      <button type="button"
-              hx-post="{% url 'delete_listing_image' img.id %}"
-              hx-target="#listing-image-{{ img.id }}"
-              hx-swap="outerHTML"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              style="position: absolute; top: 5px; right: 5px; background: rgba(220, 53, 69, 0.9); color: white; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 11px;">
-      </button>
+      <img src="{{ img.file.url }}?t={{ img.uploaded_at|date:'U' }}" class="w-full h-full object-cover">
+      
+      <div class="absolute top-1 left-1 right-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        
+        <button type="button"
+                hx-post="{% url 'set_main_image' img.id %}"
+                hx-target="#listing-images-area"
+                hx-swap="innerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="bg-larp-dark/90 {% if img.is_main %}text-larp-gold{% else %}text-larp-light/50 hover:text-larp-gold{% endif %} rounded p-1 text-[10px] w-5 h-5 flex items-center justify-center cursor-pointer shadow transition-colors"
+                title="Set as main image">
+          <i class="{% if img.is_main %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+        </button>
+
+        <button type="button"
+                hx-post="{% url 'delete_listing_image' img.id %}"
+                hx-target="#listing-images-area"
+                hx-swap="innerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="absolute top-1 right-1 bg-red-600/90 text-white rounded p-1 hover:bg-red-700 transition-colors cursor-pointer text-[10px] w-5 h-5 flex items-center justify-center shadow"
+                aria-label="Remove image">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      </div>
+
+      <div class="absolute bottom-1 left-1 right-1 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        {% if not img.is_main and not forloop.counter0 == 1 %}
+          <button type="button"
+                  hx-post="{% url 'move_image' img.id 'left' %}"
+                  hx-target="#listing-images-area"
+                  hx-swap="innerHTML"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="bg-larp-dark/90 text-larp-light hover:text-larp-gold rounded w-6 h-5 flex items-center justify-center shadow text-[10px] cursor-pointer">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+        {% endif %}
+        
+        {% if not img.is_main and not forloop.last %}
+          <button type="button"
+                  hx-post="{% url 'move_image' img.id 'right' %}"
+                  hx-target="#listing-images-area"
+                  hx-swap="innerHTML"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="bg-larp-dark/90 text-larp-light hover:text-larp-gold rounded w-6 h-5 flex items-center justify-center shadow text-[10px] cursor-pointer">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        {% endif %}
+      </div>
+
+      {% if img.is_main %}
+        <div class="absolute bottom-0 inset-x-0 bg-larp-gold text-larp-dark text-[9px] font-bold text-center py-0.5 tracking-wider uppercase pointer-events-none">
+          Cover Image
+        </div>
+      {% endif %}
     </div>
   {% endfor %}
 </div>
 
-<div class="upload-images-group">
-  <label for="id_images" class="custom-file-upload" 
-         hx-post="{% url 'upload_listing_images' listing.id %}"
-         hx-target="#listing-images-area"
-         hx-trigger="change from:#id_images"
-         hx-encoding="multipart/form-data" 
-         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-         style="background: #3b35dc; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; display: inline-block;">
-    Upload Photos
+<div class="upload-images-group flex items-center gap-4">
+  <label for="id_images" class="inline-block bg-larp-copper text-larp-dark hover:bg-larp-light font-bold text-xs uppercase px-4 py-2.5 rounded shadow tracking-wider cursor-pointer transition-colors duration-200">
+    <i class="fa-solid fa-cloud-arrow-up mr-2"></i>Choose Files
   </label>
 
-  <div style="display: none;">
-    <input type="file" name="images" id="id_images" accept="image/*" multiple>
+  <span class="text-xs text-larp-light/50 italic">Multi-selection supported.</span>
+
+  <div class="hidden">
+    <input type="file" name="images" id="id_images" accept="image/*" multiple
+           hx-post="{% url 'upload_listing_images' listing.id %}"
+           hx-target="#listing-images-area"
+           hx-trigger="change from:#id_images"
+           hx-encoding="multipart/form-data" 
+           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   </div>
 </div>

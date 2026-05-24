@@ -1,34 +1,64 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Update my profile</h2>
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ user_form.as_p }}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     
-    <div id="profile-picture-area" class="profile-picture-section" style="margin-top: 20px; margin-bottom: 20px;">
-        {% include "users/partials/profile_picture_snippet.html" %}
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-larp-copper/20 pb-6">
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-tight">Profile Settings</h1>
+            <p class="text-sm text-larp-light/60 mt-1">Manage your account details, upload your profile picture, and view your active dashboard data.</p>
+        </div>
     </div>
-    
-    <button type="submit">Save changes</button>
-</form>
 
-<hr>
-<h3>Security</h3>
-<p><a href="{% url 'password_change' %}">Change password</a></p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <form method="post" enctype="multipart/form-data" class="lg:col-span-2 bg-larp-brown p-6 rounded-lg border border-larp-copper/20 space-y-6 shadow-xl">
+            {% csrf_token %}
+            <h3 class="text-lg font-serif font-bold text-larp-gold uppercase tracking-wider border-b border-larp-copper/10 pb-2">Personal Information</h3>
+            
+            <div id="profile-picture-area" class="bg-larp-dark/50 p-4 rounded border border-larp-copper/10">
+                {% include "users/partials/profile_picture_snippet.html" %}
+            </div>
+            
+            <div class="space-y-4 text-larp-light">
+                {{ user_form.as_p }}
+            </div>
+            
+            <div class="flex justify-end pt-2">
+                <button type="submit" class="bg-larp-gold text-larp-dark hover:bg-larp-light font-bold text-xs uppercase px-5 py-3 rounded tracking-wider transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </form>
 
-<hr>
-<h3>Profile deletion</h3>
-<form action="{% url 'delete_profile' user.id %}" method="post" onsubmit="return confirm('Are you sure? This action is irreversible. ');">
-    {% csrf_token %}
-    <p>
-        <label id="delete_confirmation_password_label" for="id_delete_confirmation_password">Account password</label>
-        <br>
-        <input type="password" name="delete_confirmation_password" id="id_delete_confirmation_password" required autocomplete="current-password">
-    </p>
-    <button type="submit" class="btn btn-delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
-        Delete
-    </button>
-</form>
+        <div class="space-y-6">
+            
+            <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/10">
+                <h3 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider mb-3">Security & Password</h3>
+                <p class="text-xs text-larp-light/60 mb-4">Keep your account secure by maintaining a strong, unique login password.</p>
+                <a href="{% url 'password_change' %}" class="inline-block w-full text-center bg-larp-dark hover:bg-larp-light hover:text-larp-dark border border-larp-copper/40 text-larp-light font-bold text-xs uppercase py-2.5 rounded tracking-wider transition-all">
+                    Change Password
+                </a>
+            </div>
+
+            <div class="bg-larp-brown/60 p-6 rounded-lg border border-red-900/20">
+                <h3 class="text-sm font-serif font-bold text-red-400 uppercase tracking-wider mb-2">Delete Account</h3>
+                <p class="text-xs text-larp-light/50 mb-4">Permanently delete your profile, listings, and history from our database records.</p>
+                
+                <form action="{% url 'delete_profile' user.id %}" method="post" onsubmit="return confirm('Are you completely sure? Your profile info, uploaded images, and listing history will be deleted permanently.');" class="space-y-3">
+                    {% csrf_token %}
+                    <div>
+                        <label id="delete_confirmation_password_label" for="id_delete_confirmation_password" class="text-xs text-red-300 font-medium">Confirm Password</label>
+                        <input type="password" name="delete_confirmation_password" id="id_delete_confirmation_password" required autocomplete="current-password" class="mt-1 border-red-900/40 bg-larp-dark focus:border-red-500 focus:box-shadow-[0_0_0_1px_#ef4444]">
+                    </div>
+                    <button type="submit" class="w-full bg-red-950 text-red-400 hover:bg-red-900 border border-red-800/40 font-bold text-xs uppercase py-2.5 rounded tracking-wider transition-colors">
+                        Delete Permanently
+                    </button>
+                </form>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
 {% endblock %}

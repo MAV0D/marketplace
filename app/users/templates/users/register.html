@@ -1,13 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Registration</h2>
+<div class="max-w-md mx-auto px-4 py-16">
+  <div class="bg-larp-brown p-8 rounded-lg border border-larp-copper/20 shadow-2xl">
+    
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-wide">Registration</h2>
+      <p class="text-xs text-larp-light/60 mt-1">Create an account to start using the marketplace.</p>
+    </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="text-larp-light space-y-4">
+        {{ form.as_p }}
+      </div>
+      
+      <button type="submit" class="w-full bg-larp-gold text-larp-dark hover:bg-larp-light font-bold text-sm uppercase py-3 rounded shadow tracking-wider transition-colors duration-200 mt-4">
+        Register
+      </button>
+    </form>
 
-<p>Already have an account? <a href="{% url 'login' %}">Login here!</a>.</p>
+    <div class="mt-6 pt-6 border-t border-larp-light/10 text-center">
+      <p class="text-xs text-larp-light/60">
+        Already have an account? <a href="{% url 'login' %}" class="text-larp-gold hover:underline font-medium ml-1">Login here!</a>
+      </p>
+    </div>
+    
+  </div>
+</div>
 {% endblock %}

@@ -15,16 +15,16 @@ def detail(request, id):
 @login_required
 def create_listing(request):
   listing, created = Listing.objects.get_or_create(
-      seller=request.user,
-      status=Listing.Status.DRAFT,
-      defaults={
-        'name': '',
-        'description': '',
-        'for_rent' : False,
-        'for_sale' : False,
-        'seller' : request.user,
-      }
-    )
+    seller=request.user,
+    status=Listing.Status.DRAFT,
+    defaults={
+      'name': '',
+      'description': '',
+      'for_rent': False,
+      'for_sale': False,
+      'seller': request.user,
+    }
+  )
   
   if request.method == 'POST':
     form = ListingForm(request.POST, request.FILES, instance=listing)
@@ -34,12 +34,25 @@ def create_listing(request):
       listing.status = Listing.Status.VISIBLE
       listing.save()
       
+      files = request.FILES.getlist('images')
+      if files:
+        last_image = listing.images.order_by('-position').first()
+        current_position = last_image.position if last_image else 0
+        
+        for f in files:
+          current_position += 1
+          ListingImage.objects.create(
+            listing=listing,
+            file=f,
+            position=current_position,
+            is_main=(current_position == 1)
+          )
+      
       return redirect('listing_detail', id=listing.id)
-
   else:
     form = ListingForm(instance=listing)
     
-  return render(request, 'listings/listing_form.html', {'form': form, 'listing' : listing})
+  return render(request, 'listings/listing_form.html', {'form': form, 'listing': listing})
 
 def edit_listing(request, id):
   listing = get_object_or_404(Listing, id=id)
@@ -91,20 +104,38 @@ def delete_listing(request, id):
 @login_required
 @require_POST
 def delete_listing_image(request, id):
-
   try:
+    # Fetch the targeted image ensuring ownership
     image = get_object_or_404(ListingImage, id=id, listing__seller=request.user)
+    listing = image.listing
+    was_main = image.is_main
+
     image.delete()
+
+    if was_main:
+      next_image = listing.images.order_by('position').first()
+      if next_image:
+        next_image.is_main = True
+        next_image.save()
+        
   except ListingImage.DoesNotExist:
-    pass
+    return HttpResponse(status=404)
   
-  return HttpResponse("")
+  # Re-render the partial snippet so the layout grid instantly updates via HTMX
+  return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
 
 @login_required
 @require_POST
 def upload_listing_images(request, listing_id):
   listing = get_object_or_404(Listing, id=listing_id, seller=request.user)
   files = request.FILES.getlist('images')
+  
+  if not files and not listing.images.exists():
+    return HttpResponse(
+      '<p class="text-xs font-semibold text-red-400">At least one image file is required.</p>',
+      status=422,
+      headers={"HX-Retarget": "#image-error-message"}
+    )
   
   if files:
     last_image = listing.images.order_by('-position').first()
@@ -122,3 +153,83 @@ def upload_listing_images(request, listing_id):
       )
   
   return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
+
+@login_required
+@require_POST
+def set_main_image(request, id):
+  target_image = get_object_or_404(ListingImage, id=id, listing__seller=request.user)
+  listing = target_image.listing
+  
+  other_images = listing.images.exclude(id=id).order_by('position')
+  
+  target_image.is_main = True
+  target_image.position = 1
+  target_image.save()
+  
+  for index, img in enumerate(other_images, start=2):
+    img.is_main = False
+    img.position = index
+    img.save()
+    
+  return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
+@login_required
+@require_POST
+def move_image(request, id, direction):
+  current_image = get_object_or_404(ListingImage, id=id, listing__seller=request.user)
+  listing = current_image.listing
+  
+  # Fetch ONLY secondary images sorted cleanly by position index
+  gallery = list(listing.images.filter(is_main=False).order_by('position'))
+  
+  try:
+    idx = gallery.index(current_image)
+  except ValueError:
+    # Fallback safety check if called on a main image
+    return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
+  
+  if direction == 'left' and idx > 0:
+    other_image = gallery[idx - 1]
+    current_image.position, other_image.position = other_image.position, current_image.position
+    current_image.save()
+    other_image.save()
+    
+  elif direction == 'right' and idx < len(gallery) - 1:
+    other_image = gallery[idx + 1]
+    current_image.position, other_image.position = other_image.position, current_image.position
+    current_image.save()
+    other_image.save()
+
+  return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
+
+@login_required
+@require_POST
+def auto_save_draft(request, id):
+  listing = get_object_or_404(Listing, id=id, seller=request.user)
+  
+  # Only allow background updates if the listing hasn't been finalized/published yet
+  if listing.status == Listing.Status.DRAFT:
+    # Update text fields directly from the post dictionary payload safely
+    listing.name = request.POST.get('name', listing.name)[:20] # Model limit safeguard
+    listing.description = request.POST.get('description', listing.description)
+    listing.condition = request.POST.get('condition', listing.condition)
+    
+    # Handle checkboxes cleanly
+    listing.for_sale = 'for_sale' in request.POST
+    listing.for_rent = 'for_rent' in request.POST
+    
+    # Safely convert numeric values if provided
+    s_price = request.POST.get('selling_price')
+    listing.selling_price = s_price if s_price and listing.for_sale else None
+    
+    r_price = request.POST.get('renting_price')
+    listing.renting_price = r_price if r_price and listing.for_rent else None
+    
+    # Handle ForeignKey matching safely
+    eq_type_id = request.POST.get('equipment_type')
+    if eq_type_id:
+      listing.equipment_type_id = eq_type_id
+      
+    listing.save()
+    
+  # Return an empty 204 No Content response to tell HTMX there is nothing to change or render
+  return HttpResponse(status=204)

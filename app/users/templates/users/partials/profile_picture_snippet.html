@@ -2,19 +2,11 @@
 
 <div class="current-picture-group" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
 {% if pic_form.instance.file %}
-    <a href="{{ pic_form.instance.file.url }}" target="_blank"><img src="{{ pic_form.instance.file.url }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;"></a>
-    
-    <button type="button"
-            hx-post="{% url 'delete_profile_picture' %}"
-            hx-target="#profile-picture-area"
-            hx-confirm="Are you sure you want to delete your profile picture?"
-            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            style="background: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
-        Delete
-    </button>
+    <a href="{{ pic_form.instance.file.url }}" target="_blank"><img src="{{ pic_form.instance.file.url }}?t={{ pic_form.instance.uploaded_at|date:'U' }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;"></a>
+
 {% endif %}
 
-    <label for="id_file" class="custom-file-upload" style="background: #3b35dc; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+    <label for="id_file" class="custom-file-upload" style="background: #3b35dc; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-family: sans-serif;">
     Upload New Photo</label>
 
     <div style="display: none;" 
@@ -25,5 +17,15 @@
         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         {{ pic_form.file }}
     </div>
+{% if pic_form.instance.file %}
+    <button type="button"
+            hx-post="{% url 'delete_profile_picture' %}"
+            hx-target="#profile-picture-area"
+            hx-confirm="Are you sure you want to delete your profile picture?"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            style="background: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+        Delete
+    </button>
+{% endif %}
 
 </div>

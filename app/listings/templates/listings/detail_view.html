@@ -1,53 +1,217 @@
 {% extends "base.html" %}
 
-{% block title %}{{ listing.name }} | Larp Marketplace{% endblock %}
+{% block title %}{{ listing.name }} | Marketplace{% endblock %}
 
 {% block content %}
-<div class="listing-detail">
-    <h2>{{ listing.name }}</h2>
-
-    <p><strong>Category:</strong>{{ listing.equipment_type.name }}</p>
-    <p><strong>Condition:</strong>{{ listing.get_condition_display }}</p>
-    <p><strong>Description:</strong>{{ listing.description }}</p>
-    <strong>Seller:</strong><a href="{% url 'view_profile' id=listing.seller.id%}">{{ listing.seller }}</a></p>
-
-    <hr>
-
-    {% if listing.for_sale %}
-        <p><strong>Sale Price:</strong> {{ listing.selling_price }} CZK</p>
-    {% endif %}
-
-    {% if listing.for_rent %}
-        <p><strong>Renting Price:</strong> {{ listing.renting_price }} CZK</p>
-    {% endif %}
-
-    <hr>
-
-    <h3>Images:</h3>
-    {% for image in listing.images.all %}
-        <img src="{{ image.file.url }}" alt="{{listing.name}}" style="width: 150px; margin-right: 10px;">
-    {% empty %}
-        <p>No images uploaded.</p>
-    {% endfor %}
-
-    <hr>
-
-    <h3>Details:</h3>
-    {% for attr in listing.listingattribute_set.all %}
-        <p><strong>{{ attr.value.attribute.name }}:</strong> {{ attr.value.value }}</p>
-    {% endfor %}
-
-    {% if listing.seller == user %}
-        <a href="{% url 'edit_listing' listing.id %}">Edit</a>
-    {% endif %}
+<div class="min-h-screen bg-larp-dark text-larp-light px-4 sm:px-6 lg:px-8 py-12">
+  <div class="max-w-6xl mx-auto">
     
-    {% if listing.seller == user %}
-        <form action="{% url 'delete_listing' listing.id %}" method="post" onsubmit="return confirm('Are you sure? This action is irreversible. ');">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
-            Delete
-            </button>
-        </form>
-    {% endif %}
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-16">
+      
+      <div class="md:col-span-6 flex gap-4">
+  
+        {% if listing.images.count > 1 %}
+            <div class="flex flex-col gap-3 w-24 flex-shrink-0">
+            
+            {% for extra_img in listing.images.all|slice:"1:4" %}
+                <div onclick="openGalleryModal({{ forloop.index }})" class="aspect-square bg-larpBrown rounded border border-larpCopper/20 overflow-hidden cursor-pointer hover:border-larpGold/50 transition-colors">
+                <img src="{{ extra_img.file.url }}" alt="Extra Thumbnail {{ forloop.index }}" class="w-full h-full object-cover">
+                </div>
+            {% endfor %}
+            
+            {% if listing.images.count > 4 %}
+                <div onclick="openGalleryModal(4)" class="aspect-square bg-larpBrown/40 rounded border border-larpCopper/20 flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:bg-larpBrown transition-all relative overflow-hidden group">
+                <img src="{{ listing.images.all.4.file.url }}" alt="Thumbnail Preview" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity">
+                <span class="relative z-10 text-[10px] font-bold text-larpLight/80 uppercase tracking-tighter leading-tight">More pictures</span>
+                </div>
+            {% endif %}
+
+            </div>
+        {% endif %}
+
+        <div onclick="openGalleryModal(0)" class="flex-grow w-full aspect-square bg-larpBrown rounded-lg border border-larpCopper/20 overflow-hidden shadow-2xl relative cursor-pointer group">
+            {% if listing.main_image %}
+            <img src="{{ listing.main_image.file.url }}" alt="{{ listing.name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.01]">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center bg-larpBrown">
+                <span class="text-larpLight/30 font-serif italic text-sm">No image available</span>
+            </div>
+            {% endif %}
+        </div>
+
+        </div>
+
+      <div class="md:col-span-6 flex flex-col justify-between space-y-8 lg:pl-6">        
+        <div class="space-y-6">
+      
+          <h1 class="text-4xl md:text-5xl font-serif font-bold text-larpLight tracking-tight leading-tight max-w-full md:max-w-[75%]">
+            {{ listing.name }}
+          </h1>            
+
+          
+          <div id="pricing-matrix" class="flex flex-wrap items-end gap-8 pt-2">
+  
+            {% if listing.for_sale %}
+              <div class="flex flex-col gap-3 min-w-[160px] w-fit">
+                <div class="flex items-baseline gap-2">
+                  <span class="text-3xl font-bold text-larp-copper">{{ listing.selling_price }} €</span>
+                </div>
+                <a href="{% url 'order' listing.id 0 %}" class="w-full text-center bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide">
+                  Buy now!
+                </a>
+              </div>
+            {% endif %}
+            
+            {% if listing.for_rent %}
+              <div class="flex flex-col gap-3 min-w-[160px] w-fit">
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl font-bold text-larp-copper">{{ listing.renting_price }} €</span>
+                  <span class="text-larp-light/80 text-sm font-light">/day</span>
+                </div>
+                <a href="{% url 'order' listing.id 1 %}" class="w-full text-center bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide">
+                  Rent now!
+                </a>
+              </div>
+            {% endif %}
+
+            {% if listing.seller == user %}
+              <div class="flex flex-col gap-3  w-fit ml-auto">
+               
+                <a href="{% url 'edit_listing' listing.id %}" class="w-full text-center bg-larp-copper text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2" title="Edit Listing">
+                  <i class="fa-solid fa-pen-to-square text-base"></i>
+                  <span>Edit!</span>
+                </a>
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+
+        <div id="seller-card-wrapper" class="pt-4">
+          <a href="{% url 'view_profile' id=listing.seller.id %}" class="block group bg-larp-brown/50 border border-larp-copper/20 rounded-2xl p-4 transition-all duration-300 hover:border-larp-gold/40 hover:bg-larp-brown">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full border border-larp-gold/40 overflow-hidden flex-shrink-0 bg-larp-dark">
+                {% if listing.seller.profile_picture %}
+                  <img src="{{ listing.seller.profile_picture.file.url }}" alt="{{ listing.seller.username }}" class="w-full h-full object-cover">
+                {% else %}
+                  <div class="w-full h-full flex items-center justify-center bg-larp-brown text-larp-gold font-serif text-sm font-bold">
+                    {{ listing.seller.username|slice:":1"|upper }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="min-w-0 flex-grow">
+                <h3 class="text-sm font-serif font-bold text-larp-light group-hover:text-larp-gold transition-colors truncate">
+                  {{ listing.seller.username }}
+                </h3>
+                <p class="text-xs text-larp-light/50 font-light truncate mt-0.5">
+                  {% if listing.seller.profile_description %}{{ listing.seller.profile_description }}{% endif %}
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="border-t border-larp-light/10 pt-10 space-y-12">
+      <div class="max-w-4xl space-y-4">
+        <h2 class="text-2xl font-serif font-bold uppercase tracking-wide text-larp-light">Description:</h2>
+        <div class="text-larp-light/80 text-base leading-relaxed space-y-4 font-light">
+          {{ listing.description|linebreaks }}
+        </div>
+      </div>
+
+      {% if listing.listingattribute_set.all %}
+        <div class="max-w-4xl space-y-4 pt-4">
+          <h3 class="text-lg font-serif font-bold uppercase tracking-wider text-larp-gold border-b border-larp-copper/20 pb-2">Technical Properties</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {% for attr in listing.listingattribute_set.all %}
+              <div class="bg-larp-brown/40 p-4 rounded-lg border border-larp-copper/10">
+                <span class="text-xs text-larp-copper uppercase font-bold tracking-widest block mb-0.5">{{ attr.value.attribute.name }}</span>
+                <span class="text-base font-serif font-medium text-larp-light">{{ attr.value.value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
 </div>
+
+<div id="gallery-modal" class="hidden fixed inset-0 bg-larp-dark/95 z-50 flex flex-col justify-between p-6 backdrop-blur-sm animate-fade-in">
+  <div class="flex justify-end max-w-5xl mx-auto w-full">
+    <button onclick="closeGalleryModal()" class="text-larp-light/70 hover:text-larp-gold font-serif text-3xl p-2 transition-colors cursor-pointer" aria-label="Close window">&times;</button>
+  </div>
+
+  <div class="flex-grow flex items-center justify-center max-w-4xl mx-auto w-full h-[60vh] px-4">
+    <img id="modal-viewport" src="" alt="Enlarged gallery capture" class="max-w-full max-h-full object-contain rounded-md shadow-2xl border border-larp-copper/10">
+  </div>
+
+  <div class="max-w-4xl mx-auto w-full pt-6 border-t border-larp-light/10 mt-4">
+    <div class="flex gap-4 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-thin scrollbar-thumb-larp-copper/40">
+      {% for img in listing.images.all %}
+        <button onclick="updateModalViewport('{{ img.file.url }}', {{ forloop.index0 }})" 
+                class="modal-thumb-btn w-20 h-20 flex-shrink-0 bg-larp-brown rounded border border-larp-copper/30 overflow-hidden opacity-50 hover:opacity-100 transition-all focus:outline-none">
+          <img src="{{ img.file.url }}" class="w-full h-full object-cover">
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  function syncSellerCardWidth() {
+    const matrix = document.getElementById('pricing-matrix');
+    const wrapper = document.getElementById('seller-card-wrapper');
+    if (matrix && wrapper) {
+      // Uses offsetWidth for a solid layout calculation without bounding box shifting
+      const activeWidth = matrix.offsetWidth;
+      // Set a minimum fallback width so it looks good even with a single narrow price column
+      wrapper.style.maxWidth = activeWidth > 320 ? `${activeWidth}px` : '350px';
+    }
+  }
+
+  // 2. Lightbox component states index registry bindings arrays
+  const imageSequence = [
+    {% for img in listing.images.all %}"{{ img.file.url }}",{% endfor %}
+  ];
+  
+  function openGalleryModal(initialIndex) {
+    if (imageSequence.length === 0) return;
+    
+    // Safely verify boundaries indexes falls cleanly inside range constraints checks rules
+    const targetIndex = (initialIndex >= 0 && initialIndex < imageSequence.length) ? initialIndex : 0;
+    
+    document.getElementById('gallery-modal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden'); // Freeze underlying background track layer scrolling
+    updateModalViewport(imageSequence[targetIndex], targetIndex);
+  }
+
+  function closeGalleryModal() {
+    document.getElementById('gallery-modal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  function updateModalViewport(url, activeIndex) {
+    document.getElementById('modal-viewport').src = url;
+    
+    // Update active visual borders state styles on thumbnails list selectors row trackers loops
+    const targetButtons = document.getElementsByClassName('modal-thumb-btn');
+    for (let i = 0; i < targetButtons.length; i++) {
+      if (i === activeIndex) {
+        targetButtons[i].classList.remove('opacity-50', 'border-larp-copper/30');
+        targetButtons[i].classList.add('opacity-100', 'border-larp-gold', 'scale-95');
+      } else {
+        targetButtons[i].classList.remove('opacity-100', 'border-larp-gold', 'scale-95');
+        targetButtons[i].classList.add('opacity-50', 'border-larp-copper/30');
+      }
+    }
+  }
+
+  // Bind layout resizing tracking hooks context triggers loop cycles operations
+  window.addEventListener('DOMContentLoaded', syncSellerCardWidth);
+  window.addEventListener('resize', syncSellerCardWidth);
+</script>
 {% endblock %}

@@ -1,15 +1,219 @@
 {% extends "base.html" %}
 
-{% block title %}Larp Marketplace{% endblock %}
+{% load category_tags %}
+
+{% block title %}Marketplace | LARP Inventory{% endblock %}
 
 {% block content %}
-<h1>Larp Marketplace</h1>
-<ul>
-    {% for listing in listings %}
-        <li><a href="{% url 'listing_detail' id=listing.id%}"><b>{{ listing.equipment_type.name }}:</b> {{ listing.name }} - {{ listing.selling_price }} Kč</a></li>
-    {% empty %}
-        <li>Unfortunately, there aren't any listing at the moment.</li>
-    {% endfor %}
-</ul>
+<div class="min-h-screen bg-larp-dark text-larp-light">
+  
+  <div class="max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    
+    <div class="mb-12 border-l-4 border-larp-gold pl-6">
+      <h1 class="text-4xl font-serif font-bold text-larp-light tracking-tight uppercase">
+        Available <span class="text-larp-gold">Listings</span>
+      </h1>
+      <p class="mt-2 text-larp-light/70 font-light max-w-2xl">
+        Find your new favorite piece of equipment or sell your unused LARP accessories here.  
+      </p>
+    </div>
 
+    {% if listings.has_other_pages or current_order %}
+      <div class="mb-6 flex flex-col sm:flex-row items-center justify-end gap-6 border-b border-larp-copper/10 pb-4">
+        
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-serif text-larp-light/60 uppercase tracking-wide whitespace-nowrap">
+            Sort By:
+          </label>
+          <select onchange="updateMarketOrder(this.value)"
+                  class="bg-larp-dark border border-larp-copper/30 text-larp-light text-xs rounded-md px-3 py-1.5 focus:outline-none focus:border-larp-gold transition-colors cursor-pointer min-w-[160px]">
+            <option value="-created_at" {% if current_order == '-created_at' %}selected{% endif %}>Creation date: Newest first</option>
+            <option value="created_at" {% if current_order == 'created_at' %}selected{% endif %}>Creation date: Oldest first</option>
+            <option value="selling_price" {% if current_order == 'selling_price' %}selected{% endif %}>Price: Cheap first</option>
+            <option value="-selling_price" {% if current_order == '-selling_price' %}selected{% endif %}>Price: Expensive first</option>
+            <option value="name" {% if current_order == 'name' %}selected{% endif %}>Alphabetical (A-Z)</option>
+          </select>
+        </div>
+
+        {% if listings.has_other_pages %}
+          <nav class="flex items-center gap-1 font-mono text-xs" aria-label="Marketplace pages top">
+            {% if listings.has_previous %}
+              <button onclick="changeMarketPage({{ listings.previous_page_number }})" 
+                      class="px-2.5 py-1.5 bg-larp-dark border border-larp-copper/30 text-larp-light hover:text-larp-gold hover:border-larp-gold rounded transition-colors cursor-pointer">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+            {% endif %}
+
+            {% for num in listings.paginator.page_range %}
+              {% if listings.number == num %}
+                <span class="px-3 py-1.5 bg-larp-gold text-larp-dark font-bold rounded border border-larp-gold shadow-sm">
+                  {{ num }}
+                </span>
+              {% elif num > listings.number|add:-3 and num < listings.number|add:3 %}
+                <button onclick="changeMarketPage({{ num }})" 
+                        class="px-3 py-1.5 bg-larp-dark border border-larp-copper/30 text-larp-light hover:text-larp-gold hover:border-larp-gold rounded transition-colors cursor-pointer">
+                  {{ num }}
+                </button>
+              {% endif %}
+            {% endfor %}
+
+            {% if listings.has_next %}
+              <button onclick="changeMarketPage({{ listings.next_page_number }})" 
+                      class="px-2.5 py-1.5 bg-larp-dark border border-larp-copper/30 text-larp-light hover:text-larp-gold hover:border-larp-gold rounded transition-colors cursor-pointer">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            {% endif %}
+          </nav>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-8 items-start">
+      
+      <div class="lg:col-span-1 bg-larp-brown p-6 rounded-lg border border-larp-copper/20 shadow-xl">
+        <div class="flex items-center justify-between border-b border-larp-copper/10 pb-3 mb-4">
+          <h2 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider">
+            Categories
+          </h2>
+          {% if selected_category %}
+            <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}{% if current_order %}&order_by={{ current_order }}{% endif %}" class="text-[11px] text-larp-light/40 hover:text-red-400 font-mono uppercase tracking-wider transition-colors flex items-center gap-1">
+              <i class="fa-solid fa-circle-xmark"></i> Clear
+            </a>
+          {% endif %}
+        </div>
+
+        <nav class="space-y-2">
+          <a href="{% url 'index' %}{% if request.GET.q %}?q={{ request.GET.q }}{% endif %}" class="block px-3 py-2 rounded text-xs font-medium uppercase tracking-wide transition-colors {% if not selected_category %}bg-larp-gold text-larp-dark font-bold{% else %}text-larp-light/70 hover:bg-larp-dark/40 hover:text-larp-gold{% endif %}">
+            Everything
+          </a>
+
+          <div class="space-y-1">
+            {% r_categories categories selected_category request %}
+          </div>
+        </nav>
+      </div>
+
+      <div class="lg:col-span-3 xl:col-span-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {% for listing in listings %}
+            
+            {% include "listings/partials/listing_card.html" %}
+            
+          {% empty %}
+            <div class="col-span-full flex flex-col items-center justify-center py-20 bg-larp-brown rounded-xl border border-larp-copper/20 shadow-inner">
+              <svg class="w-12 h-12 text-larp-copper/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <p class="text-larp-light font-serif text-lg">No listings found</p>
+              <p class="text-larp-light/50 text-xs mt-1">Try selecting another category tier or check back later.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    {% if listings.has_other_pages or current_order %}
+      <div class="mt-12 flex flex-col sm:flex-row items-center justify-end gap-6 border-t border-larp-copper/10 pt-6">
+        
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-serif text-larp-light/60 uppercase tracking-wide whitespace-nowrap">
+            Sort By:
+          </label>
+          <select onchange="updateMarketOrder(this.value)"
+                  class="bg-larp-dark border border-larp-copper/30 text-larp-light text-xs rounded-md px-3 py-1.5 focus:outline-none focus:border-larp-gold transition-colors cursor-pointer min-w-[160px]">
+            <option value="-created_at" {% if current_order == '-created_at' %}selected{% endif %}>Creation date: Newest first</option>
+            <option value="created_at" {% if current_order == 'created_at' %}selected{% endif %}>Creation date: Oldest first</option>
+            <option value="selling_price" {% if current_order == 'selling_price' %}selected{% endif %}>Price: Cheap first</option>
+            <option value="-selling_price" {% if current_order == '-selling_price' %}selected{% endif %}>Price: Expensive first</option>
+            <option value="name" {% if current_order == 'name' %}selected{% endif %}>Alphabetical (A-Z)</option>
+          </select>
+        </div>
+
+        {% if listings.has_other_pages %}
+          <nav class="flex items-center gap-1 font-mono text-xs" aria-label="Marketplace pages bottom">
+            {% if listings.has_previous %}
+              <button onclick="changeMarketPage({{ listings.previous_page_number }})" 
+                      class="px-2.5 py-1.5 bg-larp-dark border border-larp-copper/30 text-larp-light hover:text-larp-gold hover:border-larp-gold rounded transition-colors cursor-pointer">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+            {% endif %}
+
+            {% for num in listings.paginator.page_range %}
+              {% if listings.number == num %}
+                <span class="px-3 py-1.5 bg-larp-gold text-larp-dark font-bold rounded border border-larp-gold shadow-sm">
+                  {{ num }}
+                </span>
+              {% elif num > listings.number|add:-3 and num < listings.number|add:3 %}
+                <button onclick="changeMarketPage({{ num }})" 
+                        class="px-3 py-1.5 bg-larp-dark border border-larp-copper/30 text-larp-light hover:text-larp-gold hover:border-larp-gold rounded transition-colors cursor-pointer">
+                  {{ num }}
+                </button>
+              {% endif %}
+            {% endfor %}
+
+            {% if listings.has_next %}
+              <button onclick="changeMarketPage({{ listings.next_page_number }})" 
+                      class="px-2.5 py-1.5 bg-larp-dark border border-larp-copper/30 text-larp-light hover:text-larp-gold hover:border-larp-gold rounded transition-colors cursor-pointer">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            {% endif %}
+          </nav>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+  function toggleCategoryBranch(buttonElement) {
+    const nodeWrapper = buttonElement.closest('.category-node');
+    const childBlock = nodeWrapper.querySelector('.category-children-block');
+    
+    if (childBlock) {
+      const isHidden = childBlock.classList.contains('hidden');
+      
+      if (isHidden) {
+        childBlock.classList.remove('hidden');
+        buttonElement.classList.add('rotate-180');
+      } else {
+        childBlock.classList.add('hidden');
+        buttonElement.classList.remove('rotate-180');
+      }
+    }
+  }
+
+  function getQueryStringWithUpdate(key, value) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set(key, value);
+    return '?' + urlParams.toString();
+  }
+
+  function updateMarketOrder(sortValue) {
+    const targetParams = new URLSearchParams(window.location.search);
+    targetParams.set('order_by', sortValue);
+    targetParams.set('page', '1'); 
+    window.location.search = targetParams.toString();
+  }
+
+  function changeMarketPage(pageNumber) {
+    window.location.search = getQueryStringWithUpdate('page', pageNumber).substring(1);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const activeLinks = document.querySelectorAll('.category-children-block .text-larp-gold');
+    activeLinks.forEach(link => {
+      let parentBlock = link.closest('.category-children-block');
+      while (parentBlock) {
+        parentBlock.classList.remove('hidden');
+        const toggleBtn = parentBlock.parentElement.querySelector('.category-toggle-btn');
+        if (toggleBtn) toggleBtn.classList.add('rotate-180');
+        parentBlock = parentBlock.parentElement.closest('.category-children-block');
+      }
+    });
+  });
+</script> 
 {% endblock %}

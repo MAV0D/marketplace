@@ -1,0 +1,8 @@
+<div id="rating-container-{{ transaction.id }}" class="rating-stars bg-larp-dark/30 p-3 rounded-lg border border-larp-copper/10 text-center w-full max-w-xs mx-auto">
+  <p class="text-green-400 text-xs font-semibold mb-2 tracking-wide">Thank you for the rating!</p>
+  <div class="flex items-center justify-center gap-1">
+    {% for i in "12345" %}
+      <i class="fa{% if i|add:"0" <= current_rating %}s{% else %}r{% endif %} fa-star text-larp-gold text-base drop-shadow-[0_0_4px_rgba(212,175,55,0.2)] cursor-default"></i>
+    {% endfor %}
+  </div>
+</div>
