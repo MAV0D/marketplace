@@ -159,6 +159,20 @@ LOGOUT_REDIRECT_URL = 'index'
 
 if DEBUG:
   EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-  DEFAULT_FROM_EMAIL = 'noreply@muj-marketplace.cz'
+  DEFAULT_FROM_EMAIL = 'noreply@server2.zmatlo.cz'
+else:
+  EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+  # Use the host resolution mapping we added in docker-compose
+  EMAIL_HOST = "host.docker.internal"
+  EMAIL_PORT = 25
+
+  EMAIL_HOST_USER = ""
+  EMAIL_HOST_PASSWORD = ""
+  EMAIL_USE_TLS = False
+  EMAIL_USE_SSL = False
+
+  DEFAULT_FROM_EMAIL = "Marketplace Notifications <noreply@server2.zmatlo.cz>"
+  SERVER_EMAIL = "noreply@server2.zmatlo.cz"
   
 PASSWORD_RESET_TIMEOUT = 86400
