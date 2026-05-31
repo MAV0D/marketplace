@@ -4,3 +4,4 @@ django-cleanup
 Pillow
 dotenv
 gunicorn
+django-imagekit

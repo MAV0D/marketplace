@@ -1,8 +1,10 @@
 from django.db import models
-import os
 from django.utils.text import slugify
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill, ResizeToFit
+import os
 
 def get_upload_path(instance, filename : str):
   ext = filename.split('.')[-1]
@@ -22,6 +24,20 @@ class Image(models.Model):
   
   class Meta:
     abstract = True # template only
+    
+  preview = ImageSpecField(
+    source="file",
+    processors=[ResizeToFit(1000, 1000, False)],
+    format="WEBP",
+    options={"quality": 85},
+  )
+  
+  thumbnail = ImageSpecField(
+    source="file",
+    processors=[ResizeToFill(400, 400)],
+    format="WEBP",
+    options={"quality": 75},
+  )
     
     
 class ListingImage(Image):
@@ -54,6 +70,12 @@ def delete_empty_folders(sender, instance, **kwargs):
       if not files_in_folder or (len(files_in_folder) == 1 and files_in_folder[0] == current_file):
         if os.path.exists(instance.file.path):
           os.remove(instance.file.path)
+
+        cache_path = os.path.join(folder_path, "IK_cache")
+        if os.path.exists(cache_path):
+          for cache_file in os.listdir(cache_path):
+            os.remove(os.path.join(cache_path, cache_file))
+          os.rmdir(cache_path)
         
         os.rmdir(folder_path)
   except Exception:

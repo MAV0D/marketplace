@@ -15,13 +15,13 @@
             
             {% for extra_img in listing.images.all|slice:"1:4" %}
                 <div onclick="openGalleryModal({{ forloop.index }})" class="aspect-square bg-larpBrown rounded border border-larpCopper/20 overflow-hidden cursor-pointer hover:border-larpGold/50 transition-colors">
-                <img src="{{ extra_img.file.url }}" alt="Extra Thumbnail {{ forloop.index }}" class="w-full h-full object-cover">
+                <img src="{{ extra_img.thumbnail.url }}" alt="Extra Thumbnail {{ forloop.index }}" class="w-full h-full object-cover">
                 </div>
             {% endfor %}
             
             {% if listing.images.count > 4 %}
                 <div onclick="openGalleryModal(4)" class="aspect-square bg-larpBrown/40 rounded border border-larpCopper/20 flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:bg-larpBrown transition-all relative overflow-hidden group">
-                <img src="{{ listing.images.all.4.file.url }}" alt="Thumbnail Preview" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity">
+                <img src="{{ listing.images.all.4.thumbnail.url }}" alt="Thumbnail Preview" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity">
                 <span class="relative z-10 text-[10px] font-bold text-larpLight/80 uppercase tracking-tighter leading-tight">More pictures</span>
                 </div>
             {% endif %}
@@ -31,7 +31,7 @@
 
         <div onclick="openGalleryModal(0)" class="flex-grow w-full aspect-square bg-larpBrown rounded-lg border border-larpCopper/20 overflow-hidden shadow-2xl relative cursor-pointer group">
             {% if listing.main_image %}
-            <img src="{{ listing.main_image.file.url }}" alt="{{ listing.name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.01]">
+            <img src="{{ listing.main_image.preview.url }}" alt="{{ listing.name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.01]">
             {% else %}
             <div class="w-full h-full flex items-center justify-center bg-larpBrown">
                 <span class="text-larpLight/30 font-serif italic text-sm">No image available</span>
@@ -92,7 +92,7 @@
             <div class="flex items-center gap-4">
               <div class="w-12 h-12 rounded-full border border-larp-gold/40 overflow-hidden flex-shrink-0 bg-larp-dark">
                 {% if listing.seller.profile_picture %}
-                  <img src="{{ listing.seller.profile_picture.file.url }}" alt="{{ listing.seller.username }}" class="w-full h-full object-cover">
+                  <img src="{{ listing.seller.profile_picture.thumbnail.url }}" alt="{{ listing.seller.username }}" class="w-full h-full object-cover">
                 {% else %}
                   <div class="w-full h-full flex items-center justify-center bg-larp-brown text-larp-gold font-serif text-sm font-bold">
                     {{ listing.seller.username|slice:":1"|upper }}

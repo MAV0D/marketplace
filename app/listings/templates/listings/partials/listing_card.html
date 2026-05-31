@@ -1,7 +1,7 @@
 <div class="group relative flex flex-col w-full bg-larp-brown rounded-lg border border-larp-copper/20 shadow-lg overflow-hidden h-80 transition-all duration-300 hover:border-larp-gold/50 hover:scale-[1.02]">
   <div class="h-40 w-full bg-larp-dark flex-shrink-0 relative">
     {% if listing.main_image %}
-      <img src="{{ listing.main_image.file.url }}" alt="{{ listing.name }}" class="w-full h-full object-cover">
+      <img src="{{ listing.main_image.thumbnail.url }}" alt="{{ listing.name }}" class="w-full h-full object-cover">
     {% else %}
       <div class="w-full h-full flex items-center justify-center bg-larp-dark">
         <span class="text-larp-light/30 text-xs font-serif italic">No image found</span>
