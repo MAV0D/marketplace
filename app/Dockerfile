@@ -8,4 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "marketplace.wsgi:application"]
+
+RUN python manage.py collectstatic
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "marketplace.wsgi:application", "--workers", "3"]
