@@ -31,7 +31,7 @@ def register(request):
       subject = 'Activate your account on the LARP Marketplace!'
       message = f"Hello {user.username},\n\nTo complete your registration, click following link:\n{activation_link}"
       
-      send_mail(subject, message, 'noreply@muj-marketplace.cz', [user.email])
+      send_mail(subject, message, 'noreply@server2.zmatlo.cz', [user.email])
       
       messages.info(request, 'First step of registration successful. Check your email inbox for confirmation link. ')
       return redirect('login')
@@ -85,7 +85,7 @@ def edit_profile(request):
 def view_profile(request, id):
   user = get_object_or_404(User, id = id)
   listings = Listing.objects.filter(seller=user, status=Listing.Status.VISIBLE)
-  return render(request, "users/view_profile.html", {'user' : user, 'listings':listings})
+  return render(request, "users/view_profile.html", {'shown_user' : user, 'listings':listings})
 
 
 @login_required
