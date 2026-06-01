@@ -11,46 +11,99 @@
       <div class="md:col-span-6 flex gap-4">
   
         {% if listing.images.count > 1 %}
-            <div class="flex flex-col gap-3 w-24 flex-shrink-0">
+          <div class="flex flex-col gap-3 w-24 flex-shrink-0">
             
             {% for extra_img in listing.images.all|slice:"1:4" %}
-                <div onclick="openGalleryModal({{ forloop.index }})" class="aspect-square bg-larpBrown rounded border border-larpCopper/20 overflow-hidden cursor-pointer hover:border-larpGold/50 transition-colors">
+              <div class="aspect-square bg-larp-brown rounded border border-larp-copper/20 overflow-hidden cursor-pointer hover:border-larp-gold/50 transition-colors"
+                   hx-on:click="
+                     document.getElementById('gallery-modal').classList.remove('hidden');
+                     document.body.classList.add('overflow-hidden');
+                     
+                     const targetSrc = '{{ extra_img.preview.url }}';
+                     document.getElementById('modal-viewport').src = targetSrc;
+                     
+                     document.querySelectorAll('.modal-thumb-btn').forEach(btn => {
+                       btn.classList.remove('opacity-100', 'border-larp-gold', 'scale-95');
+                       btn.classList.add('opacity-50', 'border-larp-copper/30');
+                     });
+                     
+                     const currentBtn = document.querySelector(`.modal-thumb-btn[data-src='${targetSrc}']`);
+                     if (currentBtn) {
+                       currentBtn.classList.remove('opacity-50', 'border-larp-copper/30');
+                       currentBtn.classList.add('opacity-100', 'border-larp-gold', 'scale-95');
+                     }
+                   ">
                 <img src="{{ extra_img.thumbnail.url }}" alt="Extra Thumbnail {{ forloop.index }}" class="w-full h-full object-cover">
-                </div>
+              </div>
             {% endfor %}
             
             {% if listing.images.count > 4 %}
-                <div onclick="openGalleryModal(4)" class="aspect-square bg-larpBrown/40 rounded border border-larpCopper/20 flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:bg-larpBrown transition-all relative overflow-hidden group">
+              <div class="aspect-square bg-larp-brown/40 rounded border border-larp-copper/20 flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:bg-larp-brown transition-all relative overflow-hidden group"
+                   hx-on:click="
+                     document.getElementById('gallery-modal').classList.remove('hidden');
+                     document.body.classList.add('overflow-hidden');
+                     
+                     const targetSrc = '{{ listing.images.all.4.preview.url }}';
+                     document.getElementById('modal-viewport').src = targetSrc;
+                     
+                     document.querySelectorAll('.modal-thumb-btn').forEach(btn => {
+                       btn.classList.remove('opacity-100', 'border-larp-gold', 'scale-95');
+                       btn.classList.add('opacity-50', 'border-larp-copper/30');
+                     });
+                     
+                     const currentBtn = document.querySelector(`.modal-thumb-btn[data-src='${targetSrc}']`);
+                     if (currentBtn) {
+                       currentBtn.classList.remove('opacity-50', 'border-larp-copper/30');
+                       currentBtn.classList.add('opacity-100', 'border-larp-gold', 'scale-95');
+                     }
+                   ">
                 <img src="{{ listing.images.all.4.thumbnail.url }}" alt="Thumbnail Preview" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity">
-                <span class="relative z-10 text-[10px] font-bold text-larpLight/80 uppercase tracking-tighter leading-tight">More pictures</span>
-                </div>
+                <span class="relative z-10 text-[10px] font-bold text-larp-light/80 uppercase tracking-tighter leading-tight">More pictures</span>
+              </div>
             {% endif %}
 
-            </div>
+          </div>
         {% endif %}
 
-        <div onclick="openGalleryModal(0)" class="flex-grow w-full aspect-square bg-larpBrown rounded-lg border border-larpCopper/20 overflow-hidden shadow-2xl relative cursor-pointer group">
-            {% if listing.main_image %}
+        <div class="flex-grow w-full aspect-square bg-larp-brown rounded-lg border border-larp-copper/20 overflow-hidden shadow-2xl relative cursor-pointer group"
+             hx-on:click="
+               {% if listing.main_image %}
+                 document.getElementById('gallery-modal').classList.remove('hidden');
+                 document.body.classList.add('overflow-hidden');
+                 
+                 const targetSrc = '{{ listing.main_image.preview.url }}';
+                 document.getElementById('modal-viewport').src = targetSrc;
+                 
+                 document.querySelectorAll('.modal-thumb-btn').forEach(btn => {
+                   btn.classList.remove('opacity-100', 'border-larp-gold', 'scale-95');
+                   btn.classList.add('opacity-50', 'border-larp-copper/30');
+                 });
+                 
+                 const currentBtn = document.querySelector(`.modal-thumb-btn[data-src='${targetSrc}']`);
+                 if (currentBtn) {
+                   currentBtn.classList.remove('opacity-50', 'border-larp-copper/30');
+                   currentBtn.classList.add('opacity-100', 'border-larp-gold', 'scale-95');
+                 }
+               {% endif %}
+             ">
+          {% if listing.main_image %}
             <img src="{{ listing.main_image.preview.url }}" alt="{{ listing.name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.01]">
-            {% else %}
-            <div class="w-full h-full flex items-center justify-center bg-larpBrown">
-                <span class="text-larpLight/30 font-serif italic text-sm">No image available</span>
+          {% else %}
+            <div class="w-full h-full flex items-center justify-center bg-larp-brown">
+              <span class="text-larp-light/30 font-serif italic text-sm">No image available</span>
             </div>
-            {% endif %}
+          {% endif %}
         </div>
 
-        </div>
+      </div>
 
       <div class="md:col-span-6 flex flex-col justify-between space-y-8 lg:pl-6">        
         <div class="space-y-6">
-      
-          <h1 class="text-4xl md:text-5xl font-serif font-bold text-larpLight tracking-tight leading-tight max-w-full md:max-w-[75%]">
+          <h1 class="text-4xl md:text-5xl font-serif font-bold text-larp-light tracking-tight leading-tight max-w-full md:max-w-[75%]">
             {{ listing.name }}
           </h1>            
 
-          
           <div id="pricing-matrix" class="flex flex-wrap items-end gap-8 pt-2">
-  
             {% if listing.for_sale %}
               <div class="flex flex-col gap-3 min-w-[160px] w-fit">
                 <div class="flex items-baseline gap-2">
@@ -75,19 +128,17 @@
             {% endif %}
 
             {% if listing.seller == user %}
-              <div class="flex flex-col gap-3  w-fit ml-auto">
-               
+              <div class="flex flex-col gap-3 w-fit ml-auto">
                 <a href="{% url 'edit_listing' listing.id %}" class="w-full text-center bg-larp-copper text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2" title="Edit Listing">
                   <i class="fa-solid fa-pen-to-square text-base"></i>
                   <span>Edit!</span>
                 </a>
               </div>
             {% endif %}
-
           </div>
         </div>
 
-        <div id="seller-card-wrapper" class="pt-4">
+        <div id="seller-card-wrapper" class="pt-4 max-w-full md:max-w-md">
           <a href="{% url 'view_profile' id=listing.seller.id %}" class="block group bg-larp-brown/50 border border-larp-copper/20 rounded-2xl p-4 transition-all duration-300 hover:border-larp-gold/40 hover:bg-larp-brown">
             <div class="flex items-center gap-4">
               <div class="w-12 h-12 rounded-full border border-larp-gold/40 overflow-hidden flex-shrink-0 bg-larp-dark">
@@ -140,9 +191,13 @@
   </div>
 </div>
 
-<div id="gallery-modal" class="hidden fixed inset-0 bg-larp-dark/95 z-50 flex flex-col justify-between p-6 backdrop-blur-sm animate-fade-in">
+<div id="gallery-modal" class="hidden fixed inset-0 bg-larp-dark/95 z-50 flex flex-col justify-between p-6 backdrop-blur-sm">
   <div class="flex justify-end max-w-5xl mx-auto w-full">
-    <button onclick="closeGalleryModal()" class="text-larp-light/70 hover:text-larp-gold font-serif text-3xl p-2 transition-colors cursor-pointer" aria-label="Close window">&times;</button>
+    <button hx-on:click="
+              document.getElementById('gallery-modal').classList.add('hidden');
+              document.body.classList.remove('overflow-hidden');
+            " 
+            class="text-larp-light/70 hover:text-larp-gold font-serif text-3xl p-2 transition-colors cursor-pointer" aria-label="Close window">&times;</button>
   </div>
 
   <div class="flex-grow flex items-center justify-center max-w-4xl mx-auto w-full h-[60vh] px-4">
@@ -152,66 +207,21 @@
   <div class="max-w-4xl mx-auto w-full pt-6 border-t border-larp-light/10 mt-4">
     <div class="flex gap-4 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-thin scrollbar-thumb-larp-copper/40">
       {% for img in listing.images.all %}
-        <button onclick="updateModalViewport('{{ img.file.url }}', {{ forloop.index0 }})" 
-                class="modal-thumb-btn w-20 h-20 flex-shrink-0 bg-larp-brown rounded border border-larp-copper/30 overflow-hidden opacity-50 hover:opacity-100 transition-all focus:outline-none">
-          <img src="{{ img.file.url }}" class="w-full h-full object-cover">
+        <button data-src="{{ img.preview.url }}"
+                hx-on:click="
+                  document.getElementById('modal-viewport').src = '{{ img.preview.url }}';
+                  document.querySelectorAll('.modal-thumb-btn').forEach(btn => {
+                    btn.classList.remove('opacity-100', 'border-larp-gold', 'scale-95');
+                    btn.classList.add('opacity-50', 'border-larp-copper/30');
+                  });
+                  this.classList.remove('opacity-50', 'border-larp-copper/30');
+                  this.classList.add('opacity-100', 'border-larp-gold', 'scale-95');
+                "
+                class="modal-thumb-btn w-20 h-20 flex-shrink-0 bg-larp-brown rounded border-[3px] border-larp-copper/30 overflow-hidden opacity-50 hover:opacity-100 transition-all focus:outline-none">
+          <img src="{{ img.thumbnail.url }}" class="w-full h-full object-cover">
         </button>
       {% endfor %}
     </div>
   </div>
 </div>
-
-<script>
-  function syncSellerCardWidth() {
-    const matrix = document.getElementById('pricing-matrix');
-    const wrapper = document.getElementById('seller-card-wrapper');
-    if (matrix && wrapper) {
-      // Uses offsetWidth for a solid layout calculation without bounding box shifting
-      const activeWidth = matrix.offsetWidth;
-      // Set a minimum fallback width so it looks good even with a single narrow price column
-      wrapper.style.maxWidth = activeWidth > 320 ? `${activeWidth}px` : '350px';
-    }
-  }
-
-  // 2. Lightbox component states index registry bindings arrays
-  const imageSequence = [
-    {% for img in listing.images.all %}"{{ img.file.url }}",{% endfor %}
-  ];
-  
-  function openGalleryModal(initialIndex) {
-    if (imageSequence.length === 0) return;
-    
-    // Safely verify boundaries indexes falls cleanly inside range constraints checks rules
-    const targetIndex = (initialIndex >= 0 && initialIndex < imageSequence.length) ? initialIndex : 0;
-    
-    document.getElementById('gallery-modal').classList.remove('hidden');
-    document.body.classList.add('overflow-hidden'); // Freeze underlying background track layer scrolling
-    updateModalViewport(imageSequence[targetIndex], targetIndex);
-  }
-
-  function closeGalleryModal() {
-    document.getElementById('gallery-modal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-  }
-
-  function updateModalViewport(url, activeIndex) {
-    document.getElementById('modal-viewport').src = url;
-    
-    // Update active visual borders state styles on thumbnails list selectors row trackers loops
-    const targetButtons = document.getElementsByClassName('modal-thumb-btn');
-    for (let i = 0; i < targetButtons.length; i++) {
-      if (i === activeIndex) {
-        targetButtons[i].classList.remove('opacity-50', 'border-larp-copper/30');
-        targetButtons[i].classList.add('opacity-100', 'border-larp-gold', 'scale-95');
-      } else {
-        targetButtons[i].classList.remove('opacity-100', 'border-larp-gold', 'scale-95');
-        targetButtons[i].classList.add('opacity-50', 'border-larp-copper/30');
-      }
-    }
-  }
-
-  // Bind layout resizing tracking hooks context triggers loop cycles operations
-  window.addEventListener('DOMContentLoaded', syncSellerCardWidth);
-  window.addEventListener('resize', syncSellerCardWidth);
-</script>
 {% endblock %}
