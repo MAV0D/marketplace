@@ -31,10 +31,20 @@ def r_categories(categories, selected_category, request, depth=0):
     '''
 
     if has_children:
-      html += f'''
-        <button onclick="toggleCategoryBranch(this)" 
-                class="category-toggle-btn p-2 text-larp-copper/60 hover:text-larp-gold transition-transform duration-150 focus:outline-none" 
-                aria-label="Toggle {cat.name} subcategories">
+      html += '''
+
+        <button hx-on:click="
+                  const node = this.closest('.category-node');
+                  if (node) {
+                    const block = node.querySelector('.category-children-block');
+                    if (block) {
+                      block.classList.toggle('hidden');
+                      this.classList.toggle('rotate-180');
+                    }
+                  }
+                "
+                class="category-toggle-btn p-2 text-larp-copper/60 hover:text-larp-gold transition-transform duration-150 focus:outline-none
+                aria-label="Toggle subcategories">
           <i class="fa-solid fa-chevron-down text-[10px]"></i>
         </button>
       '''
