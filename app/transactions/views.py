@@ -6,6 +6,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
+from django.conf import settings
 from datetime import datetime
 from listings.models import Listing
 from .models import Transaction
@@ -48,6 +49,8 @@ def order_review(request, listing_id, order_type):
     uid = urlsafe_base64_encode(force_bytes(new_transaction.pk))
     
     current_site = request.get_host()
+    if not settings.DEBUG:
+      current_site += "/marketplace"
     activation_link = f"http://{current_site}/transactions/complete-transaction/{uid}/{token}/"
 
     
