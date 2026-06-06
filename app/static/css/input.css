@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-larp-dark: #1A1A1A;
+  --color-larp-brown: #362B23;
+  --color-larp-copper: #C87D55;
+  --color-larp-gold: #D4AF37;
+  --color-larp-light: #E0DCD3;
+}
+
+@layer base {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* Base form styles */
+  input, textarea, select {
+    @apply bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md px-3 py-2 w-full mt-1 focus:outline-none focus:border-larp-gold focus:ring-1 focus:ring-larp-gold;
+  }
+}

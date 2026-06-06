@@ -16,3 +16,6 @@ db.sqlite3
 media/
 docker-compose.override.yml
 app/staticfiles/*
+
+node_modules/
+.eslintcache
