@@ -8,6 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-
-RUN python manage.py collectstatic --no-input
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "marketplace.wsgi:application", "--workers", "3"]
+ENTRYPOINT ["/app/entrypoint.sh"]
