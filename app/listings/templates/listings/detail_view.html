@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="min-h-screen bg-larp-dark text-larp-light px-4 sm:px-6 lg:px-8 py-12">
-  <div class="max-w-6xl mx-auto">
+  <article class="max-w-6xl mx-auto">
     
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-16">
       
@@ -39,6 +39,9 @@
             
             {% if listing.images.count > 4 %}
               <div class="aspect-square bg-larp-brown/40 rounded border border-larp-copper/20 flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:bg-larp-brown transition-all relative overflow-hidden group"
+                   role="button"
+                   tabindex="0"
+                   aria-label="Open full image gallery"     
                    hx-on:click="
                      document.getElementById('gallery-modal').classList.remove('hidden');
                      document.body.classList.add('overflow-hidden');
@@ -66,6 +69,9 @@
         {% endif %}
 
         <div class="flex-grow w-full aspect-square bg-larp-brown rounded-lg border border-larp-copper/20 overflow-hidden shadow-2xl relative cursor-pointer group"
+             role="button"
+             tabindex="0"
+             aria-label="Enlarge main image"
              hx-on:click="
                {% if listing.main_image %}
                  document.getElementById('gallery-modal').classList.remove('hidden');
@@ -156,9 +162,9 @@
                 {% endif %}
               </div>
               <div class="min-w-0 flex-grow">
-                <h3 class="text-sm font-serif font-bold text-larp-light group-hover:text-larp-gold transition-colors truncate">
+                <p class="text-sm font-serif font-bold text-larp-light group-hover:text-larp-gold transition-colors truncate">
                   {{ listing.seller.username }}
-                </h3>
+                </p>
                 <p class="text-xs text-larp-light/50 font-light truncate mt-0.5">
                   {% if listing.seller.profile_description %}{{ listing.seller.profile_description }}{% endif %}
                 </p>
@@ -180,7 +186,7 @@
 
       {% if listing.listingattribute_set.all %}
         <div class="max-w-4xl space-y-4 pt-4">
-          <h3 class="text-lg font-serif font-bold uppercase tracking-wider text-larp-gold border-b border-larp-copper/20 pb-2">Technical Properties</h3>
+          <h2 class="text-lg font-serif font-bold uppercase tracking-wider text-larp-gold border-b border-larp-copper/20 pb-2">Technical Properties</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {% for attr in listing.listingattribute_set.all %}
               <div class="bg-larp-brown/40 p-4 rounded-lg border border-larp-copper/10">
@@ -193,7 +199,7 @@
       {% endif %}
     </div>
 
-  </div>
+  </article>
 </div>
 
 <div id="gallery-modal" class="hidden fixed inset-0 bg-larp-dark/95 z-50 flex flex-col justify-between p-6 backdrop-blur-sm">

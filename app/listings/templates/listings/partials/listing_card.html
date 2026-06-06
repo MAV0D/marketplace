@@ -11,9 +11,9 @@
 
   <div class="p-4 flex flex-col justify-between flex-grow h-40">
     <a href="{% url 'listing_detail' listing.id %}" class="absolute inset-0 z-10" aria-label="View details for {{ listing.name }}"></a>
-    <h4 class="text-lg font-bold text-larp-light truncate font-serif" title="{{ listing.name }}">
+    <p class="text-lg font-bold text-larp-light truncate font-serif" title="{{ listing.name }}">
       {{ listing.name }}
-    </h4>
+    </p>
     
     <div class="flex justify-between items-end border-t border-larp-light/10 pt-3">
       

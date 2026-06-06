@@ -14,7 +14,7 @@
         
         <form method="post" enctype="multipart/form-data" class="lg:col-span-2 bg-larp-brown p-6 rounded-lg border border-larp-copper/20 space-y-6 shadow-xl">
             {% csrf_token %}
-            <h3 class="text-lg font-serif font-bold text-larp-gold uppercase tracking-wider border-b border-larp-copper/10 pb-2">Personal Information</h3>
+            <h2 class="text-lg font-serif font-bold text-larp-gold uppercase tracking-wider border-b border-larp-copper/10 pb-2">Personal Information</h2>
             
             <div id="profile-picture-area" class="bg-larp-dark/50 p-4 rounded border border-larp-copper/10">
                 {% include "users/partials/profile_picture_snippet.html" %}
@@ -34,7 +34,7 @@
         <div class="space-y-6">
             
             <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/10">
-                <h3 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider mb-3">Security & Password</h3>
+                <h2 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider mb-3">Security & Password</h2>
                 <p class="text-xs text-larp-light/60 mb-4">Keep your account secure by maintaining a strong, unique login password.</p>
                 <a href="{% url 'password_change' %}" class="inline-block w-full text-center bg-larp-copper hover:bg-larp-gold hover:text-larp-light border border-larp-dark/40 text-larp-light font-bold text-xs uppercase py-2.5 rounded tracking-wider transition-all">
                     Change Password
@@ -42,7 +42,7 @@
             </div>
 
             <div class="bg-larp-brown/60 p-6 rounded-lg border border-red-900/20">
-                <h3 class="text-sm font-serif font-bold text-red-500 uppercase tracking-wider mb-2">Delete Account</h3>
+                <h2 class="text-sm font-serif font-bold text-red-500 uppercase tracking-wider mb-2">Delete Account</h2>
                 <p class="text-xs text-larp-light/50 mb-4">Permanently delete your profile, listings, and history from our database records.</p>
                 
                 <form action="{% url 'delete_profile' user.id %}" method="post" onsubmit="return confirm('Are you completely sure? Your profile info, uploaded images, and listing history will be deleted permanently.');" class="space-y-4">

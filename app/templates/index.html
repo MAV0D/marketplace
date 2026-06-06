@@ -24,10 +24,10 @@
         <div class="mb-6 flex flex-col sm:flex-row items-center justify-end gap-6 border-b border-larp-copper/10 pb-4">
           
           <div class="flex items-center gap-2">
-            <label class="text-xs font-serif text-larp-light/60 uppercase tracking-wide whitespace-nowrap">
+            <label for="sort_top" class="text-xs font-serif text-larp-light/60 uppercase tracking-wide whitespace-nowrap">
               Sort By:
             </label>
-            <select name="order_by"
+            <select id="sort_top" name="order_by"
                     hx-get="{{ request.path }}"
                     hx-trigger="change"
                     hx-target="#listings-grid-wrapper"
@@ -213,10 +213,10 @@
         <div class="mt-12 flex flex-col sm:flex-row items-center justify-end gap-6 border-t border-larp-copper/10 pt-6">
           
           <div class="flex items-center gap-2">
-            <label class="text-xs font-serif text-larp-light/60 uppercase tracking-wide whitespace-nowrap">
+            <label for="sort_top" class="text-xs font-serif text-larp-light/60 uppercase tracking-wide whitespace-nowrap">
               Sort By:
             </label>
-            <select name="order_by"
+            <select id="sort_top" name="order_by"
                     hx-get="{{ request.path }}"
                     hx-trigger="change"
                     hx-target="#listings-grid-wrapper"

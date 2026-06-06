@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -66,6 +65,7 @@
                         name="q" 
                         value="{{ request.GET.q|default:'' }}" 
                         placeholder="Search gear listings..." 
+                        aria-label="Search gear listings"
                         class="w-full bg-larp-dark border border-larp-copper/30 text-larp-light text-xs rounded-md pr-4 py-2 focus:outline-none focus:border-larp-gold transition-colors placeholder-larp-light/30"
                         style="padding-left: 36px !important; display: block; width: 100%;">
                 

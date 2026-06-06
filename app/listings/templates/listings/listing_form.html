@@ -13,14 +13,16 @@
         </div>
 
         <div class="flex items-center gap-3 self-start md:self-center">
-            <button hx-post="{% url 'delete_listing' listing.id %}"
+            <button type="button"
+                    hx-post="{% url 'delete_listing' listing.id %}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                     hx-vals='{"draft": "1"}'
                     hx-confirm="Are you sure you want to discard this draft? This action is irreversible."
                     class="whitespace-nowrap bg-red-800 text-larp-light hover:bg-red-700 font-serif font-bold text-sm px-4 py-2 rounded-full shadow-md transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2 cursor-pointer">
                 <span>Clear draft</span>
             </button>
-            <button hx-post="{% url 'create_listing' %}" 
+            <button type="button"
+                    hx-post="{% url 'create_listing' %}" 
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                     hx-include="#listing-form"
                     hx-vals='{"save_draft": "1"}'
