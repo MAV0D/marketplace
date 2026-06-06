@@ -7,8 +7,27 @@ from images.models import ProfilePicture
 class CustomUserCreationForm(UserCreationForm):
   class Meta(UserCreationForm.Meta):
     model = get_user_model()
-    fields = UserCreationForm.Meta.fields + ('email', 'location')
+    fields = ('email', 'username')
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    
+    
+    if 'username' in self.fields:
+      self.fields['username'].help_text = ''
+      self.fields['username'].widget.attrs.update({'autocomplete': 'username'})
+      if 'autofocus' in self.fields['username'].widget.attrs:
+        del self.fields['username'].widget.attrs['autofocus']
+    
+    if 'email' in self.fields:
+      self.fields['email'].widget.attrs.update({'autocomplete': 'email', 'autofocus': True})
       
+    if 'password1' in self.fields:
+      self.fields['password1'].help_text = ''
+      
+    if 'password2' in self.fields:
+      self.fields['password2'].help_text = ''
+  
   def clean_email(self):
     email = self.cleaned_data.get('email')
     if get_user_model().objects.filter(email=email).exists():
@@ -22,11 +41,6 @@ class ProfilePictureForm(forms.ModelForm):
     widgets = {
       'file': forms.FileInput(attrs={'accept': 'image/*'})
     }
-  
-class UserProfileForm(forms.ModelForm):
-  class Meta:
-    model = get_user_model()
-    fields = ('email', 'profile_description', 'location')
     
 class UserProfileForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
@@ -36,6 +50,10 @@ class UserProfileForm(forms.ModelForm):
   class Meta:
     model = get_user_model()
     fields = ('email', 'profile_description', 'location')
+    widgets = {
+      'location': forms.TextInput(),
+      'profile_description': forms.Textarea(attrs={'rows': 3}),
+    }
     
   def clean_current_password(self):
     current_password = self.cleaned_data.get('current_password')

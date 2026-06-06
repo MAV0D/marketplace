@@ -36,23 +36,24 @@
             <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/10">
                 <h3 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider mb-3">Security & Password</h3>
                 <p class="text-xs text-larp-light/60 mb-4">Keep your account secure by maintaining a strong, unique login password.</p>
-                <a href="{% url 'password_change' %}" class="inline-block w-full text-center bg-larp-dark hover:bg-larp-light hover:text-larp-dark border border-larp-copper/40 text-larp-light font-bold text-xs uppercase py-2.5 rounded tracking-wider transition-all">
+                <a href="{% url 'password_change' %}" class="inline-block w-full text-center bg-larp-copper hover:bg-larp-gold hover:text-larp-light border border-larp-dark/40 text-larp-light font-bold text-xs uppercase py-2.5 rounded tracking-wider transition-all">
                     Change Password
                 </a>
             </div>
 
             <div class="bg-larp-brown/60 p-6 rounded-lg border border-red-900/20">
-                <h3 class="text-sm font-serif font-bold text-red-400 uppercase tracking-wider mb-2">Delete Account</h3>
+                <h3 class="text-sm font-serif font-bold text-red-500 uppercase tracking-wider mb-2">Delete Account</h3>
                 <p class="text-xs text-larp-light/50 mb-4">Permanently delete your profile, listings, and history from our database records.</p>
                 
-                <form action="{% url 'delete_profile' user.id %}" method="post" onsubmit="return confirm('Are you completely sure? Your profile info, uploaded images, and listing history will be deleted permanently.');" class="space-y-3">
+                <form action="{% url 'delete_profile' user.id %}" method="post" onsubmit="return confirm('Are you completely sure? Your profile info, uploaded images, and listing history will be deleted permanently.');" class="space-y-4">
                     {% csrf_token %}
                     <div>
-                        <label id="delete_confirmation_password_label" for="id_delete_confirmation_password" class="text-xs text-red-300 font-medium">Confirm Password</label>
-                        <input type="password" name="delete_confirmation_password" id="id_delete_confirmation_password" required autocomplete="current-password" class="mt-1 border-red-900/40 bg-larp-dark focus:border-red-500 focus:box-shadow-[0_0_0_1px_#ef4444]">
+                        <label id="delete_confirmation_password_label" for="id_delete_confirmation_password" class="text-xs text-red-500/60 font-medium block mb-1">Confirm Password</label>
+                        <input type="password" name="delete_confirmation_password" id="id_delete_confirmation_password" required autocomplete="current-password" class="w-full bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md px-3 py-2 focus:border-red-500 focus:outline-none transition-colors">
                     </div>
-                    <button type="submit" class="w-full bg-red-950 text-red-400 hover:bg-red-900 border border-red-800/40 font-bold text-xs uppercase py-2.5 rounded tracking-wider transition-colors">
-                        Delete Permanently
+                    
+                    <button type="submit" class="text-sm w-full text-center bg-red-800 text-larp-light hover:bg-red-700 font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2">
+                        <span>Delete Permanently</span>
                     </button>
                 </form>
             </div>
