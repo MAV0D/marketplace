@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.http import HttpResponse
+from django.urls import reverse
 from .models import Listing, EquipmentType, ListingAttribute, FilterValue
 from .forms import ListingForm
 from images.models import ListingImage
@@ -165,12 +166,16 @@ def delete_listing(request, id):
   listing.delete()
   
   if "draft" in request.POST:
-    messages.success(request, "Draft cleared successfully.")
+    messages.info(request, "Draft cleared successfully.")
+    
     if request.headers.get('HX-Request'):
-      return render(request, 'partials/messages.html')
+      response = HttpResponse()
+      response['HX-Redirect'] = reverse('create_listing')
+      return response
+      
     return redirect('create_listing')
   
-  messages.success(request, "Listing deleted successfully.")
+  messages.info(request, "Listing deleted successfully.")
   return redirect('index')
 
 @login_required

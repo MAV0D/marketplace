@@ -148,7 +148,7 @@
             <div class="flex items-center gap-4">
               <div class="w-12 h-12 rounded-full border border-larp-gold/40 overflow-hidden flex-shrink-0 bg-larp-dark">
                 {% if listing.seller.profile_picture %}
-                  <img src="{{ listing.seller.profile_picture.thumbnail.url }}" alt="{{ listing.seller.username }}" class="w-full h-full object-cover">
+                  <img src="{{ listing.seller.profile_picture.thumbnail.url }}" alt="{{ listing.seller.username }} profile picture" class="w-full h-full object-cover">
                 {% else %}
                   <div class="w-full h-full flex items-center justify-center bg-larp-brown text-larp-gold font-serif text-sm font-bold">
                     {{ listing.seller.username|slice:":1"|upper }}
@@ -223,7 +223,7 @@
                   this.classList.add('opacity-100', 'border-larp-gold', 'scale-95');
                 "
                 class="modal-thumb-btn w-20 h-20 flex-shrink-0 bg-larp-brown rounded border-[3px] border-larp-copper/30 overflow-hidden opacity-50 hover:opacity-100 transition-all focus:outline-none">
-          <img src="{{ img.thumbnail.url }}" class="w-full h-full object-cover">
+          <img src="{{ img.thumbnail.url }}" alt="" class="w-full h-full object-cover">
         </button>
       {% endfor %}
     </div>

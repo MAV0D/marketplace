@@ -6,7 +6,7 @@
   {% for img in listing.images.all|dictsort:"position" %}
     <div id="listing-image-{{ img.id }}" class="relative w-28 h-28 bg-larp-dark rounded border {% if img.is_main %}border-larp-gold shadow-[0_0_8px_rgba(212,175,55,0.25)]{% else %}border-larp-copper/30{% endif %} overflow-hidden group">
       
-      <img src="{{ img.file.url }}?t={{ img.uploaded_at|date:'U' }}" class="w-full h-full object-cover">
+      <img src="{{ img.file.url }}?t={{ img.uploaded_at|date:'U' }}" alt="uploaded image {{img.id}}" class="w-full h-full object-cover">
       
       <div class="absolute top-1 left-1 right-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         
