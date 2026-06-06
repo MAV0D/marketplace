@@ -2,11 +2,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preload" href="{% static 'css/styles.css' %}" as="style">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A marketplace for LARP gear and accessories.">
   <title>{% block title %}Larp Marketplace{% endblock %}</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="description" content="A marketplace for LARP gear and accessories.">
+  
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -14,13 +16,77 @@
   
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+  
+  <script src="{% static 'js/main.js' %}" defer></script>
 </head>
 <body class="bg-larp-dark text-larp-light font-sans min-h-screen flex flex-col justify-between">
   
+  <nav class="bg-larp-brown border-b border-larp-copper/20 px-4 sm:px-6 lg:px-8 py-4 shadow-md">
+    <div class="max-w-[90%] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-6">
+        <a href="{% url 'index' %}" class="font-serif font-bold text-xl text-larp-gold uppercase tracking-wider hover:text-larp-light transition-colors">Larp Marketplace</a>
+      </div>
+      
+      <form method="get" action="{% url 'index' %}" class="relative block w-full max-w-sm">
+        <label for="search-input" class="sr-only">Search gear listings</label>
+        <input type="text" 
+               id="search-input"
+               name="q" 
+               value="{{ request.GET.q|default:'' }}" 
+               placeholder="Search gear listings..." 
+               class="block w-full bg-larp-dark border border-larp-copper/30 text-larp-light text-xs rounded-md pl-9 pr-4 py-2 focus:outline-none focus:border-larp-gold transition-colors placeholder-larp-light/30">
+        
+        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-larp-copper/60">
+          <span class="fa-solid fa-magnifying-glass text-[11px] inline-block" aria-hidden="true"></span>
+        </div>
+
+        {% if request.GET.q %}
+          <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" 
+             class="absolute inset-y-0 right-3 flex items-center pr-3 text-larp-light/30 hover:text-red-400 transition-colors" 
+             title="Clear search"
+             aria-label="Clear search">
+            <span class="fa-solid fa-circle-xmark text-xs" aria-hidden="true"></span>
+          </a>
+        {% endif %}
+      </form>
+      
+      <div class="flex items-center gap-4 text-sm">
+        {% if user.is_authenticated %}
+          <span class="text-larp-light/70">Greetings, <strong class="text-larp-light">{{ user.username }}</strong>!</span>
+          <a href="{% url 'edit_profile' %}" class="hover:text-larp-gold transition-colors">Edit Profile</a>
+          <a href="{% url 'create_listing' %}" class="text-sm font-medium hover:text-larp-gold transition-colors">Create Listing</a>
+          <form action="{% url 'logout' %}" method="post" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="text-larp-copper hover:text-larp-gold font-semibold transition-colors">
+              Logout
+            </button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="hover:text-larp-gold transition-colors">Login</a>
+          <a href="{% url 'register' %}" class="text-larp-gold hover:text-larp-light transition-colors font-medium">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
   <main class="flex-grow">
-    {% include "partials/messages.html" %}
+    <div id="messages-container" class="max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      {% include "partials/messages.html" %}
+    </div>
     {% block content %}{% endblock %}
   </main>
 
-  </body>
+  <aside id="info-banner" class="hidden fixed bottom-0 left-0 w-full bg-larp-brown border-t border-larp-copper/30 text-larp-light p-4 text-center z-50 shadow-2xl" aria-label="Cookie consent banner">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4">
+      <p class="text-sm text-larp-light/80 m-0">This website runs only on mandatory functional cookies and cannot operate without them.</p>
+      <button id="accept-banner-btn" class="bg-larp-gold text-larp-dark hover:bg-larp-light hover:text-larp-dark font-bold text-xs uppercase px-4 py-2 rounded shadow transition-all duration-200 tracking-wider">
+        Accept
+      </button>
+    </div>
+  </aside>
+
+  <footer class="bg-larp-brown/40 border-t border-larp-copper/10 py-6 text-center text-xs text-larp-light/40">
+    <p>&copy; 2026 Vojtech Zmatlo. All chronicles reserved.</p>
+  </footer>
+</body>
 </html>
