@@ -2,31 +2,6 @@ from django import forms
 from .models import Listing
 from django.core.exceptions import ValidationError
 
-
-class MultipleFileInput(forms.ClearableFileInput):
-  allow_multiple_selected = True
-
-class MultipleFileField(forms.FileField):
-  def __init__(self, *args, **kwargs):
-    kwargs.setdefault("widget", MultipleFileInput(attrs={'accept': 'image/*'}))
-    super().__init__(*args, **kwargs)
-
-  def clean(self, data, initial=None):
-    single_file_clean = super().clean
-    if isinstance(data, (list, tuple)):
-      MAX_UPLOAD_SIZE = 5 * 1024 * 1024
-        
-      result = []
-      for d in data:
-        if d.size > MAX_UPLOAD_SIZE:
-          raise ValidationError(f"File {d.name} is too big. Maximum filesize is 5MB.")
-        
-        res = single_file_clean(d, initial)
-        result.append(res)
-    else:
-      result = single_file_clean(data, initial)
-    return result
-
 class ListingForm(forms.ModelForm):
   class Meta:
     model = Listing
@@ -43,6 +18,9 @@ class ListingForm(forms.ModelForm):
     
   def clean(self):
     cleaned_data = super().clean()
+    
+    if self.data and 'save_draft' in self.data:
+      return cleaned_data
     
     for_rent = cleaned_data.get('for_rent')
     rent_price = cleaned_data.get('renting_price')
@@ -63,6 +41,14 @@ class ListingForm(forms.ModelForm):
     has_uploaded_images = bool(self.files.getlist('images'))
 
     if not has_db_images and not has_uploaded_images:
-      raise forms.ValidationError("You must upload at least one image before your listing can be saved or published.")
+      raise forms.ValidationError("You must upload at least one image before your listing can be published.")
       
     return cleaned_data
+  
+  def full_clean(self, *args, **kwargs):
+    super().full_clean(*args, **kwargs)
+    
+    if self.data and 'save_draft' in self.data:
+      for field_name in list(self._errors.keys()):
+        if 'required' in [err.code for err in self._errors[field_name].as_data()] and field_name != "name":
+          del self._errors[field_name]

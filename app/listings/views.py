@@ -26,34 +26,37 @@ def create_listing(request):
     }
   )
   
+  if request.method == 'GET' and listing.name == '':
+    listing.images.all().delete()
+  
   if request.method == 'POST':
     form = ListingForm(request.POST, request.FILES, instance=listing)
     if form.is_valid():
       listing = form.save(commit=False)
       listing.seller = request.user
-      listing.status = Listing.Status.VISIBLE
+      if "save_listing" in request.POST:
+        listing.status = Listing.Status.VISIBLE
+        listing.save()
+        return redirect('listing_detail', id=listing.id)
+      
       listing.save()
+      messages.success(request, "Draft saved successfully.")
       
-      files = request.FILES.getlist('images')
-      if files:
-        last_image = listing.images.order_by('-position').first()
-        current_position = last_image.position if last_image else 0
-        
-        for f in files:
-          current_position += 1
-          ListingImage.objects.create(
-            listing=listing,
-            file=f,
-            position=current_position,
-            is_main=(current_position == 1)
-          )
+      if request.headers.get('HX-Request'):
+        return render(request, 'partials/messages.html')
       
-      return redirect('listing_detail', id=listing.id)
+      return redirect('index')
+    elif request.headers.get('HX-Request'):
+        messages.error(request, "You must enter name before saving form.")
+        return render(request, 'partials/messages.html')
+
+
   else:
     form = ListingForm(instance=listing)
     
   return render(request, 'listings/listing_form.html', {'form': form, 'listing': listing})
 
+@login_required
 def edit_listing(request, id):
   listing = get_object_or_404(Listing, id=id)
   
@@ -98,7 +101,13 @@ def delete_listing(request, id):
   
   listing.delete()
   
-  messages.success(request, "Inzerát byl úspěšně smazán.")
+  if "draft" in request.POST:
+    messages.success(request, "Draft cleared successfully.")
+    if request.headers.get('HX-Request'):
+      return render(request, 'partials/messages.html')
+    return redirect('create_listing')
+  
+  messages.success(request, "Listing deleted successfully.")
   return redirect('index')
 
 @login_required
@@ -201,35 +210,5 @@ def move_image(request, id, direction):
 
   return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
 
-@login_required
-@require_POST
-def auto_save_draft(request, id):
-  listing = get_object_or_404(Listing, id=id, seller=request.user)
-  
-  # Only allow background updates if the listing hasn't been finalized/published yet
-  if listing.status == Listing.Status.DRAFT:
-    # Update text fields directly from the post dictionary payload safely
-    listing.name = request.POST.get('name', listing.name)[:20] # Model limit safeguard
-    listing.description = request.POST.get('description', listing.description)
-    listing.condition = request.POST.get('condition', listing.condition)
-    
-    # Handle checkboxes cleanly
-    listing.for_sale = 'for_sale' in request.POST
-    listing.for_rent = 'for_rent' in request.POST
-    
-    # Safely convert numeric values if provided
-    s_price = request.POST.get('selling_price')
-    listing.selling_price = s_price if s_price and listing.for_sale else None
-    
-    r_price = request.POST.get('renting_price')
-    listing.renting_price = r_price if r_price and listing.for_rent else None
-    
-    # Handle ForeignKey matching safely
-    eq_type_id = request.POST.get('equipment_type')
-    if eq_type_id:
-      listing.equipment_type_id = eq_type_id
-      
-    listing.save()
-    
-  # Return an empty 204 No Content response to tell HTMX there is nothing to change or render
-  return HttpResponse(status=204)
+
+

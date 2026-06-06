@@ -10,5 +10,5 @@ urlpatterns = [
   path('delete-listing-image/<int:id>/', views.delete_listing_image, name='delete_listing_image'),
   path('image/<int:id>/set-main/', views.set_main_image, name='set_main_image'),
   path('image/<int:id>/move/<str:direction>/', views.move_image, name='move_image'),
-  path('listing/<int:id>/auto-save/', views.auto_save_draft, name='auto_save_draft'),
+  path('get-attributes/', views.get_attributes_for_category, name='get_attributes_for_category'),
 ]

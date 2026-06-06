@@ -28,7 +28,14 @@
         }
     </script>
     <style>
-        /* Modern form fields stylings for standard Django form outputs */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
         form p { margin-bottom: 1rem; }
         input[type="text"], input[type="number"], input[type="password"], input[type="email"], textarea, select {
             background-color: #1A1A1A;
@@ -96,16 +103,10 @@
     </nav>
 
     <main class="flex-grow">
-        {% if messages %}
-            <div class="max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-                {% for message in messages %}
-                    <div class="p-4 rounded-md mb-4 border font-medium {% if message.tags == 'success' %} bg-green-950/40 text-green-300 border-green-800/50 {% elif message.tags == 'error' %} bg-red-950/40 text-red-300 border-red-800/50 {% else %} bg-blue-950/40 text-blue-300 border-blue-800/50 {% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+        
+        <div id="messages-container" class="max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8 mt-6 ">
+            {% include "partials/messages.html" %}
             </div>
-        {% endif %}
-
         {% block content %}{% endblock %}
     </main>
 

@@ -1,18 +1,44 @@
 {% extends "base.html" %}
 
-{% block title %}{% if listing.name == '' %}New Listing{% else %}Edit Listing{% endif %} | Marketplace{% endblock %}
+{% block title %}{% if listing.status == 'DRAFT' %}New Listing{% else %}Edit Listing{% endif %} | Marketplace{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    
-    <div class="mb-8 border-l-4 border-larp-gold pl-6">
+    <div class="mb-8 border-l-4 border-larp-gold pl-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
         <h1 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-tight">
-            {% if listing.name == '' %}Create New Listing{% else %}Edit Existing Listing{% endif %}
+                {% if listing.status == 'DRAFT' %}Create New Listing{% else %}Edit Existing Listing{% endif %}
         </h1>
         <p class="mt-2 text-sm text-larp-light/60">Fill in the fields to catalog this item within our market archive.</p>
     </div>
 
-    <form method="post" enctype="multipart/form-data" class="bg-larp-brown p-6 rounded-lg border border-larp-copper/20 space-y-6 shadow-xl">
+        <div class="flex items-center gap-3 self-start md:self-center">
+            
+            <button hx-post="{% url 'delete_listing' listing.id %}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-confirm="Are you sure you want to discard this draft? This action is irreversible."
+                    hx-target="#messages-container"
+                    hx-swap="innerHTML"
+                    name="draft"
+                    class="whitespace-nowrap bg-red-800 text-larp-light hover:bg-red-700 font-serif font-bold text-sm px-4 py-2 rounded-full shadow-md transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2 cursor-pointer">
+                <span>Clear draft</span>
+            </button>
+            <button hx-post="{% url 'create_listing' %}" 
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-include="#listing-form"
+                    name="save_draft"
+                    value="1"
+                    hx-target="#messages-container"
+                    hx-swap="innerHTML"
+                    formnovalidate
+                    class="whitespace-nowrap bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-sm px-4 py-2 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2">
+                <span>Save draft</span>
+            </button>
+            
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="listing-form" class="bg-larp-brown p-6 rounded-lg border border-larp-copper/20 space-y-6 shadow-xl">
         {% csrf_token %}
         
         <div class="space-y-4 text-larp-light">
@@ -22,6 +48,12 @@
                 {{ form.name }}
                 {% if form.name.errors %}<p class="text-red-400 text-xs mt-1">{{ form.name.errors.as_text }}</p>{% endif %}
             </div>
+            
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-larp-light">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<p class="text-red-400 text-xs mt-1">{{ form.description.errors.as_text }}</p>{% endif %}
+            </div>
 
             <div>
                 <label for="{{ form.equipment_type.id_for_label }}" class="block text-sm font-medium text-larp-light">Category</label>
@@ -29,16 +61,12 @@
                 {% if form.equipment_type.errors %}<p class="text-red-400 text-xs mt-1">{{ form.equipment_type.errors.as_text }}</p>{% endif %}
             </div>
 
+            <div id="dynamic-attributes"></div>
+
             <div>
                 <label for="{{ form.condition.id_for_label }}" class="block text-sm font-medium text-larp-light">Condition</label>
                 {{ form.condition }}
                 {% if form.condition.errors %}<p class="text-red-400 text-xs mt-1">{{ form.condition.errors.as_text }}</p>{% endif %}
-            </div>
-
-            <div>
-                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-larp-light">Description</label>
-                {{ form.description }}
-                {% if form.description.errors %}<p class="text-red-400 text-xs mt-1">{{ form.description.errors.as_text }}</p>{% endif %}
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
@@ -120,12 +148,10 @@
                 {% endfor %}
             </div>
         {% endif %}
-
-        <div id="dynamic-attributes"></div>
         
         <div class="pt-4 border-t border-larp-light/10 flex justify-end">
-            <button type="submit" class="bg-larp-gold text-larp-dark hover:bg-larp-light font-bold text-sm uppercase px-6 py-3 rounded-md shadow tracking-wider transition-colors duration-200">
-                {% if listing.name == '' %}Publish Listing{% else %}Save Changes{% endif %}
+            <button type="submit" name="save_listing" class="bg-larp-gold text-larp-dark hover:bg-larp-light font-bold text-sm uppercase px-6 py-3 rounded-md shadow tracking-wider transition-colors duration-200">
+                {% if listing.status == 'DRAFT' %}Publish Listing{% else %}Save Changes{% endif %}
             </button>
         </div>
     </form>
