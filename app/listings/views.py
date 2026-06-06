@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.http import HttpResponse
-from .models import Listing
+from .models import Listing, EquipmentType, ListingAttribute, FilterValue
 from .forms import ListingForm
 from images.models import ListingImage
 
@@ -34,6 +34,37 @@ def create_listing(request):
     if form.is_valid():
       listing = form.save(commit=False)
       listing.seller = request.user
+      
+      ListingAttribute.objects.filter(listing=listing).delete()
+      for key, value in request.POST.items():
+        
+        if key.startswith('attr_') and not key.startswith('attr_custom_') and value:
+          try:
+            ListingAttribute.objects.create(listing=listing, value_id=int(value))
+          except ValueError:
+            continue
+            
+        elif key.startswith('attr_custom_') and value:
+          try:
+            attr_id = int(key.split('_')[-1])
+            clean_value = value.strip()
+            
+            try:
+              num_val = float(clean_value.replace(',', '.'))
+            except ValueError:
+              num_val = None
+              
+            new_filter_val, created = FilterValue.objects.get_or_create(
+              attribute_id=attr_id,
+              value=clean_value,
+              defaults={'numeric_value': num_val}
+            )
+            
+            ListingAttribute.objects.create(listing=listing, value=new_filter_val)
+            
+          except ValueError:
+            continue
+      
       if "save_listing" in request.POST:
         listing.status = Listing.Status.VISIBLE
         listing.save()
@@ -53,7 +84,7 @@ def create_listing(request):
 
   else:
     form = ListingForm(instance=listing)
-    
+  
   return render(request, 'listings/listing_form.html', {'form': form, 'listing': listing})
 
 @login_required
@@ -66,6 +97,38 @@ def edit_listing(request, id):
   if request.method == "POST":
     form = ListingForm(request.POST, request.FILES, instance=listing)
     if form.is_valid():
+      
+      ListingAttribute.objects.filter(listing=listing).delete()
+      for key, value in request.POST.items():
+        
+        if key.startswith('attr_') and not key.startswith('attr_custom_') and value:
+          try:
+            ListingAttribute.objects.create(listing=listing, value_id=int(value))
+          except ValueError:
+            continue
+            
+        elif key.startswith('attr_custom_') and value:
+          try:
+            attr_id = int(key.split('_')[-1])
+            clean_value = value.strip()
+            
+            try:
+              num_val = float(clean_value.replace(',', '.'))
+            except ValueError:
+              num_val = None
+              
+            new_filter_val, created = FilterValue.objects.get_or_create(
+              attribute_id=attr_id,
+              value=clean_value,
+              defaults={'numeric_value': num_val}
+            )
+            
+            ListingAttribute.objects.create(listing=listing, value=new_filter_val)
+            
+          except ValueError:
+            continue
+      
+      
       form.save()
       
       image_ids_to_delete = request.POST.getlist('delete_images')
@@ -114,7 +177,6 @@ def delete_listing(request, id):
 @require_POST
 def delete_listing_image(request, id):
   try:
-    # Fetch the targeted image ensuring ownership
     image = get_object_or_404(ListingImage, id=id, listing__seller=request.user)
     listing = image.listing
     was_main = image.is_main
@@ -210,5 +272,38 @@ def move_image(request, id, direction):
 
   return render(request, 'listings/partials/listing_images_snippet.html', {'listing': listing})
 
-
-
+def get_attributes_for_category(request):
+  category_id = request.GET.get('equipment_type')
+  listing_id = request.GET.get('listing_id')
+  
+  if not category_id:
+    return HttpResponse("")
+    
+  category = get_object_or_404(EquipmentType, id=category_id)
+  attributes = category.filter_options.all()
+  
+  existing_values = {}
+  existing_text_values = {}
+  
+  if listing_id and listing_id.isdigit():
+    # Use select_related to speed up the database query
+    existing_attrs = ListingAttribute.objects.filter(listing_id=listing_id).select_related('value', 'value__attribute')
+    
+    for attr in existing_attrs:
+      existing_values[attr.value.attribute_id] = attr.value_id
+      
+      # NEW: Check if numeric, and pass the browser-safe number format
+      if attr.value.attribute.is_numeric and attr.value.numeric_value is not None:
+        num = attr.value.numeric_value
+        # If it's a whole number (15.0), strip the decimal for a cleaner UI (15)
+        existing_text_values[attr.value.attribute_id] = int(num) if num.is_integer() else num
+      else:
+        existing_text_values[attr.value.attribute_id] = attr.value.value
+      
+  context = {
+    'attributes': attributes,
+    'existing_values': existing_values,
+    'existing_text_values': existing_text_values
+  }
+  
+  return render(request, 'listings/partials/attributes_form_fields.html', context)

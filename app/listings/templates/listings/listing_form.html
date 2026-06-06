@@ -6,11 +6,11 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="mb-8 border-l-4 border-larp-gold pl-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-        <h1 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-tight">
+            <h1 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-tight">
                 {% if listing.status == 'DRAFT' %}Create New Listing{% else %}Edit Existing Listing{% endif %}
-        </h1>
-        <p class="mt-2 text-sm text-larp-light/60">Fill in the fields to catalog this item within our market archive.</p>
-    </div>
+            </h1>
+            <p class="mt-2 text-sm text-larp-light/60">Fill in the fields to catalog this item within our market archive.</p>
+        </div>
 
         <div class="flex items-center gap-3 self-start md:self-center">
             
@@ -57,7 +57,13 @@
 
             <div>
                 <label for="{{ form.equipment_type.id_for_label }}" class="block text-sm font-medium text-larp-light">Category</label>
-                {{ form.equipment_type }}
+                <div hx-get="{% url 'get_attributes_for_category' %}"
+                    hx-trigger="change from:select[name='equipment_type'], load"
+                    hx-target="#dynamic-attributes"
+                    hx-include="[name='equipment_type']"
+                    hx-vals='{"listing_id": "{{ listing.id|default:"" }}"}'>
+                    {{ form.equipment_type }}
+                </div>
                 {% if form.equipment_type.errors %}<p class="text-red-400 text-xs mt-1">{{ form.equipment_type.errors.as_text }}</p>{% endif %}
             </div>
 

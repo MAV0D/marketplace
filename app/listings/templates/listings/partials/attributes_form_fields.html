@@ -1,0 +1,42 @@
+{% load category_tags %}
+
+{% if attributes %}
+<div class="space-y-4 pt-4">
+  <h3 class="text-sm font-serif font-bold text-larp-gold uppercase tracking-wider">Attributes</h3>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {% for attr in attributes %}
+      <div>
+        <label class="block text-xs font-medium text-larp-light/80 mb-1">{{ attr.name }} ({{ attr.unit }})</label>
+        
+        {% if attr.is_numeric %}
+          <div class="relative flex items-center">
+            <input type="number" 
+                  step="any"
+                  name="attr_custom_{{ attr.id }}" 
+                  required
+                  placeholder="Enter {{ attr.name|lower }}..."
+                  value="{{ existing_text_values|get_item:attr.id|default_if_none:'' }}"
+                  class="bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md pl-3 pr-10 py-2 w-full focus:border-larp-gold focus:outline-none">            
+            {% if attr.unit %}
+              <span class="absolute right-3 text-xs text-larp-light/50 font-bold uppercase pointer-events-none select-none">
+                {{ attr.unit }}
+              </span>
+            {% endif %}
+          </div>
+
+        {% else %}
+          <select name="attr_{{ attr.id }}" required class="bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md px-3 py-2 w-full focus:border-larp-gold focus:outline-none">
+            <option value="">-- Select Value --</option>
+            {% for val in attr.filtervalue_set.all %}
+              <option value="{{ val.id }}"
+                {% if existing_values|get_item:attr.id|default_if_none:'' == val.id %}selected{% endif %}>
+                {{ val.value }}
+              </option>
+            {% endfor %}
+          </select>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

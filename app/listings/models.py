@@ -57,18 +57,16 @@ class Listing(models.Model):
   
   @property
   def main_image(self):
-    """Vrátí hlavní obrázek inzerátu, případně první dostupný, nebo None"""
-    # 1. Pokusíme se najít obrázek s příznakem is_main
     main_img = self.images.filter(is_main=True).first()
     if main_img:
       return main_img
       
-    # 2. Záloha: Pokud z nějakého důvodu is_main chybí, vezmeme první obrázek v pořadí
     return self.images.first()
   
 class FilterAttribute(models.Model):
   name = models.CharField(max_length=20)
   is_numeric = models.BooleanField(default=False)
+  unit = models.CharField(max_length=10, null=True)
   
   def __str__(self):
     return self.name

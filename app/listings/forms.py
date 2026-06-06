@@ -42,6 +42,18 @@ class ListingForm(forms.ModelForm):
 
     if not has_db_images and not has_uploaded_images:
       raise forms.ValidationError("You must upload at least one image before your listing can be published.")
+
+    equipment_type = cleaned_data.get('equipment_type')
+    
+    if equipment_type:
+      required_attrs = equipment_type.filter_options.all()
+      
+      for attr in required_attrs:
+        val_dropdown = self.data.get(f'attr_{attr.id}')
+        val_custom = self.data.get(f'attr_custom_{attr.id}')
+        
+        if not val_dropdown and not val_custom:
+          self.add_error(None, f"The specification '{attr.name}' is required to publish this listing.")
       
     return cleaned_data
   

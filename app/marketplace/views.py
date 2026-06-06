@@ -1,31 +1,30 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from django.db.models import Q
-from listings.models import Listing, EquipmentType
+from listings.models import Listing, EquipmentType, FilterAttribute
 
 def index(request):
-  # Get sorting parameter from URL, defaulting to newest listings first
   sort_by = request.GET.get('order_by', '-created_at')
   
-  # Map human-readable dropdown options securely to model database fields
   allowed_sorting = {
-    '-created_at': '-created_at',       # Newest First
-    'created_at': 'created_at',         # Oldest First
-    'selling_price': 'selling_price',   # Price: Low to High
-    '-selling_price': '-selling_price', # Price: High to Low
-    'name': 'name'                      # Alphabetical
+    '-created_at': '-created_at',       
+    'created_at': 'created_at',         
+    'selling_price': 'selling_price',   
+    '-selling_price': '-selling_price', 
+    'name': 'name'                      
   }
   
-  # Fallback to default if an unexpected sorting key is passed
   order_field = allowed_sorting.get(sort_by, '-created_at')
 
-  # Base Queryset with ordering injected directly
   listings = Listing.objects.filter(status=Listing.Status.VISIBLE).prefetch_related('images').order_by(order_field)
   categories = EquipmentType.objects.filter(parent=None).prefetch_related('children')
   
-  # Handle Category Filtering
   selected_slug = request.GET.get('category')
   selected_category = None
+  available_filters = []
+  
+  active_numeric_filters = {} 
+
   if selected_slug:
     try:
       selected_category = EquipmentType.objects.get(slug=selected_slug)
@@ -38,10 +37,41 @@ def index(request):
           
       collect_child_ids(selected_category)
       listings = listings.filter(equipment_type_id__in=target_ids)
+      
+      available_filters = FilterAttribute.objects.filter(
+          equipmenttype__in=target_ids
+      ).distinct().prefetch_related('filtervalue_set')
+      
+      chosen_filter_ids = request.GET.getlist('filter_val')
+      if chosen_filter_ids:
+        for val_id in chosen_filter_ids:
+          listings = listings.filter(attributes__value_id=val_id).distinct()
+
+      for attr in available_filters:
+        if attr.is_numeric:
+          min_key = f'min_attr_{attr.id}'
+          max_key = f'max_attr_{attr.id}'
+          
+          min_val = request.GET.get(min_key)
+          max_val = request.GET.get(max_key)
+          
+          active_numeric_filters[attr.id] = {
+              'min': min_val if min_val else '',
+              'max': max_val if max_val else ''
+          }
+          
+          if min_val or max_val:
+            attr_q = Q(attributes__value__attribute=attr)
+            if min_val:
+              attr_q &= Q(attributes__value__numeric_value__gte=float(min_val))
+            if max_val:
+              attr_q &= Q(attributes__value__numeric_value__lte=float(max_val))
+            
+            listings = listings.filter(attr_q).distinct()
+
     except EquipmentType.DoesNotExist:
       pass
 
-  # Handle Text Search Matching
   search_query = request.GET.get('q')
   if search_query:
     search_query = search_query.strip()
@@ -50,7 +80,6 @@ def index(request):
       Q(description__icontains=search_query)
     )
 
-  # PAGINATION ENGINE: Split total listings into chunks of 20 items per page
   paginator = Paginator(listings, 20)
   page_number = request.GET.get('page', 1)
   
@@ -62,9 +91,11 @@ def index(request):
     page_obj = paginator.page(paginator.num_pages)
 
   context = {
-    'listings': page_obj,               # Swapped out raw queryset for page object chunk
+    'listings': page_obj,
     'categories': categories,
     'selected_category': selected_category,
-    'current_order': sort_by,           # Used to set 'selected' state in HTML template dropdown
+    'current_order': sort_by,
+    'available_filters': available_filters,
+    'active_numeric_filters': active_numeric_filters,
   }
   return render(request, 'index.html', context)
