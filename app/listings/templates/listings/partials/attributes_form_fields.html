@@ -26,7 +26,7 @@
 
         {% else %}
           <select name="attr_{{ attr.id }}" required class="bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md px-3 py-2 w-full focus:border-larp-gold focus:outline-none">
-            <option value="">-- Select Value --</option>
+            <option value="">– Select Value –</option>
             {% for val in attr.filtervalue_set.all %}
               <option value="{{ val.id }}"
                 {% if existing_values|get_item:attr.id|default_if_none:'' == val.id %}selected{% endif %}>

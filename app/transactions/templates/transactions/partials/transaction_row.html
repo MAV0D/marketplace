@@ -1,11 +1,18 @@
 <td class="px-6 py-4 whitespace-nowrap font-serif font-bold text-larp-light">{{ tx.listing.name }}</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-larp-light hover:text-larp-gold transition-colors">
+  {% if is_seller %}
+    <a href="{% url 'view_profile' id=tx.buyer.id %}">{{ tx.buyer.username }}</a>
+  {% else %}
+    <a href="{% url 'view_profile' id=tx.listing.seller.id %}">{{ tx.listing.seller.username }}</a>
+  {% endif %}
+</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-larp-light/70">
   <span class="px-2 py-1 rounded text-xs uppercase font-mono bg-larp-dark border border-larp-copper/20">
     {{ tx.get_type_display }}
   </span>
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-larp-copper font-bold">
-  {% if tx.type == 'SALE' %}{{ tx.listing.selling_price }}{% else %}{{ tx.listing.renting_price }}{% endif %} €
+  {{ tx.total_price }} €
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-xs font-mono text-larp-light/40">{{ tx.date|date:"d. m. Y H:i" }}</td>
 
@@ -95,7 +102,7 @@
     </div>
   {% else %}
     <span class="text-xs text-larp-light/20 italic flex items-center justify-end gap-1 select-none">
-      <i class="fa-solid fa-lock text-[10px]"></i> Rates after completion
+      Rate after completion
     </span>
   {% endif %}
 </td>

@@ -22,6 +22,7 @@ class Transaction(models.Model):
   type = models.CharField(max_length=10, choices=Type)
   start_date = models.DateField(blank=True, null=True)
   end_date = models.DateField(blank=True, null=True)
+  total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
   listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
   buyer = models.ForeignKey(User, on_delete=models.CASCADE)
   

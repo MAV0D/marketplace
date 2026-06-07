@@ -188,17 +188,17 @@
 
     <div class="border-t border-larp-light/10 pt-10 space-y-12">
       <div class="max-w-4xl space-y-4">
-        <h2 class="text-2xl font-serif font-bold uppercase tracking-wide text-larp-light">Description:</h2>
+        <h2 class="text-2xl font-serif font-bold uppercase tracking-wider text-larp-gold border-b border-larp-copper/20 pb-2">Description</h2>
         <div class="text-larp-light/80 text-base leading-relaxed space-y-4 font-light">
           {{ listing.description|linebreaks }}
         </div>
       </div>
 
-      {% if listing.listingattribute_set.all %}
+      {% if listing.attributes.all %}
         <div class="max-w-4xl space-y-4 pt-4">
-          <h2 class="text-lg font-serif font-bold uppercase tracking-wider text-larp-gold border-b border-larp-copper/20 pb-2">Technical Properties</h2>
+          <h2 class="text-2xl font-serif font-bold uppercase tracking-wider text-larp-gold border-b border-larp-copper/20 pb-2">Attributes</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {% for attr in listing.listingattribute_set.all %}
+            {% for attr in listing.attributes.all %}
               <div class="bg-larp-brown/40 p-4 rounded-lg border border-larp-copper/10">
                 <span class="text-xs text-larp-copper uppercase font-bold tracking-widest block mb-0.5">{{ attr.value.attribute.name }}</span>
                 <span class="text-base font-serif font-medium text-larp-light">{{ attr.value.value }}</span>

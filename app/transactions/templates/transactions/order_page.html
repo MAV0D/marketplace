@@ -9,9 +9,30 @@
     <div class="text-center mb-8">
       <h2 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-wide">Placing Order</h2>
       <p class="text-xs text-larp-light/60 mt-2">
-        You are placing an order to <span class="text-larp-gold font-semibold">{% if order_type %}rent{% else %}buy{% endif %}</span> 
-        <span class="text-larp-light font-semibold block mt-0.5">{{ listing.name }}</span>
+        You are placing an order to <span class="text-larp-gold font-semibold">{% if order_type %}rent{% else %}buy{% endif %}</span>.
       </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-8 p-4 bg-larp-dark/40 rounded-lg border border-larp-copper/10">
+      <div class="w-24 h-24 sm:w-20 sm:h-20 rounded overflow-hidden bg-larp-dark flex-shrink-0 border border-larp-copper/20 relative">
+        {% if listing.main_image %}
+          <img src="{{ listing.main_image.thumbnail.url }}" alt="{{ listing.name }}" class="inset-0 w-full h-full object-cover">
+        {% else %}
+          <div class="inset-0 w-full h-full flex items-center justify-center text-larp-light/30 text-[10px] font-serif italic">No image</div>
+        {% endif %}
+      </div>
+      
+      <div class="flex-grow text-left sm:text-left">
+        <h3 class="font-serif font-bold text-larp-light leading-tight">{{ listing.name }}</h3>
+        <p class="text-xs text-larp-light/60 mt-0.5">Seller: <span class="text-larp-light/90">{{ listing.seller.username }}</span></p>
+        <div class="mt-2 font-bold text-larp-copper text-lg">
+          {% if order_type %}
+            {{ listing.renting_price }} € <span class="text-xs font-light text-larp-light/60">/ day</span>
+          {% else %}
+            {{ listing.selling_price }} €
+          {% endif %}
+        </div>
+      </div>
     </div>
 
     <form method="post" action="" class="space-y-6">
@@ -24,15 +45,42 @@
                  class="bg-larp-dark border border-larp-copper/30 text-larp-light rounded-md px-3 py-2 w-full focus:outline-none focus:border-larp-gold transition-colors text-sm">
         </div>
 
+        <div class="p-4 bg-larp-dark/60 border border-larp-copper/20 rounded-md flex justify-between items-center">
+          <span class="text-sm font-medium text-larp-light/80 uppercase tracking-wider">Total Price:</span>
+          <span id="dynamic-total" class="text-2xl font-bold text-larp-gold">0.00 €</span>
+        </div>
+
         <script>
-          flatpickr("#date_range", {
-            mode: "range",
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            allowInput: true,
-            "locale": {
-              "firstDayOfWeek": 1
-            }
+          document.addEventListener('DOMContentLoaded', function() {
+            const disabledDates = {{ disabled_dates_json|safe|default:"[]" }};
+            const pricePerDay = parseFloat("{{ listing.renting_price|default:'0' }}".replace(',', '.'));
+            const totalDisplay = document.getElementById('dynamic-total');
+
+            flatpickr("#date_range", {
+              mode: "range",
+              dateFormat: "Y-m-d",
+              minDate: "today",
+              allowInput: true,
+              disable: disabledDates,
+              locale: {
+                firstDayOfWeek: 1
+              },
+              onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length === 2) {
+                  const startDate = selectedDates[0];
+                  const endDate = selectedDates[1];
+                  
+                  const diffTime = Math.abs(endDate - startDate);
+                  
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                  
+                  const total = (diffDays * pricePerDay).toFixed(2);
+                  totalDisplay.textContent = total + ' €';
+                } else {
+                  totalDisplay.textContent = '0.00 €';
+                }
+              }
+            });
           });
         </script>
       {% endif %}
@@ -43,7 +91,7 @@
     </form>
 
     <div class="mt-6 pt-6 border-t border-larp-light/10 text-center">
-      <a href="{% url 'view_profile' id=listing.seller.id %}" class="text-xs text-larp-light/50 hover:text-larp-gold transition-colors">
+      <a href="{% url 'listing_detail' id=listing.id %}" class="text-xs text-larp-light/50 hover:text-larp-gold transition-colors">
         Cancel and go back
       </a>
     </div>

@@ -80,7 +80,7 @@ def index(request):
       Q(description__icontains=search_query)
     )
 
-  paginator = Paginator(listings, 20)
+  paginator = Paginator(listings, 8)
   page_number = request.GET.get('page', 1)
   
   try:
