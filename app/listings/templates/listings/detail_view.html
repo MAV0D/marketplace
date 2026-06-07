@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ listing.name }} | Marketplace{% endblock %}
+{% block title %}LARP Marketplace | {{ listing.name }}{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-larp-dark text-larp-light px-4 sm:px-6 lg:px-8 py-12">
@@ -41,7 +41,7 @@
               <div class="aspect-square bg-larp-brown/40 rounded border border-larp-copper/20 flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:bg-larp-brown transition-all relative overflow-hidden group"
                    role="button"
                    tabindex="0"
-                   aria-label="Open full image gallery"     
+                   aria-label="Open full image gallery"    
                    hx-on:click="
                      document.getElementById('gallery-modal').classList.remove('hidden');
                      document.body.classList.add('overflow-hidden');
@@ -109,47 +109,54 @@
             {{ listing.name }}
           </h1>
 
-          <div id="pricing-matrix" class="flex flex-wrap items-end gap-8 pt-2">
+          <div id="pricing-matrix" class="flex flex-wrap items-end gap-6 pt-2">
             {% if listing.for_sale %}
-              <div class="flex flex-col gap-3 min-w-[160px] w-fit">
+              <div class="flex flex-col gap-3 w-fit">
                 <div class="flex items-baseline gap-2">
                   <span class="text-3xl font-bold text-larp-copper">{{ listing.selling_price }} €</span>
                 </div>
-                <a href="{% url 'order' listing.id 0 %}" class="w-full text-center bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide">
-                  Buy now!
-                </a>
+                {% if listing.seller != user %}
+                  <a href="{% url 'order' listing.id 0 %}" class="whitespace-nowrap text-center bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-8 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide">
+                    Buy now!
+                  </a>
+                {% endif %}
               </div>
             {% endif %}
             
             {% if listing.for_rent %}
-              <div class="flex flex-col gap-3 min-w-[160px] w-fit">
+              <div class="flex flex-col gap-3 w-fit">
                 <div class="flex items-baseline gap-1">
                   <span class="text-3xl font-bold text-larp-copper">{{ listing.renting_price }} €</span>
                   <span class="text-larp-light/80 text-sm font-light">/day</span>
                 </div>
-                <a href="{% url 'order' listing.id 1 %}" class="w-full text-center bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide">
-                  Rent now!
-                </a>
-              </div>
-            {% endif %}
-
-            {% if listing.seller == user %}
-              <div class="flex flex-col gap-3 w-fit ml-auto">
-                <form method="post" action="{% url 'delete_listing' listing.id %}" class="w-full">
-                  {% csrf_token %}
-                  <button type="submit" onclick="return confirm('Are you sure you want to delete this listing? This action is irreversible.');" class="w-full text-center bg-red-800 text-larp-light hover:bg-red-700 font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2">
-                    <span>Delete</span>
-                  </button>
-                </form>
-                <a href="{% url 'edit_listing' listing.id %}" class="w-full text-center bg-larp-copper text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2" title="Edit Listing">
-                  <span>Edit!</span>
-                </a>
-                <a href="{% url 'manage_availability' listing.id %}" class="w-full text-center bg-larp-copper text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2" title="Manage availability">
-                  <span>Manage availability of listing</span>
-                </a>
+                {% if listing.seller != user %}
+                  <a href="{% url 'order' listing.id 1 %}" class="whitespace-nowrap text-center bg-larp-gold text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-8 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide">
+                    Rent now!
+                  </a>
+                {% endif %}
               </div>
             {% endif %}
           </div>
+
+          {% if listing.seller == user %}
+            <div class="pt-6 mt-4 border-t border-larp-copper/20">
+              <h3 class="text-xs font-serif text-larp-gold uppercase tracking-widest mb-4">Seller Tools</h3>
+              <div class="flex flex-wrap items-center gap-3">
+                <a href="{% url 'edit_listing' listing.id %}" class="whitespace-nowrap bg-larp-copper text-larp-dark hover:bg-larp-light font-bold text-sm px-5 py-2.5 rounded-full transition-colors">
+                  Edit Listing
+                </a>
+                <a href="{% url 'manage_availability' listing.id %}" class="whitespace-nowrap bg-larp-copper text-larp-dark hover:bg-larp-light font-bold text-sm px-5 py-2.5 rounded-full transition-colors">
+                  Manage Availability
+                </a>
+                <form method="post" action="{% url 'delete_listing' listing.id %}" class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" onclick="return confirm('Are you sure you want to delete this listing? This action is irreversible.');" class="whitespace-nowrap bg-red-800 text-larp-light hover:bg-red-700 font-bold text-sm px-5 py-2.5 rounded-full transition-colors">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endif %}
         </div>
 
         <div id="seller-card-wrapper" class="pt-4 max-w-full md:max-w-md">
