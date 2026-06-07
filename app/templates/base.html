@@ -61,8 +61,8 @@
             </button>
           </form>
         {% else %}
-          <a href="{% url 'login' %}" class="hover:text-larp-gold transition-colors">Login</a>
           <a href="{% url 'register' %}" class="text-larp-gold hover:text-larp-light transition-colors font-medium">Register</a>
+          <a href="{% url 'login' %}" class="hover:text-larp-gold transition-colors">Login</a>
         {% endif %}
       </div>
     </div>
