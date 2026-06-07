@@ -17,7 +17,6 @@
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
   
-  <script src="{% static 'js/main.js' %}" defer></script>
 </head>
 <body class="bg-larp-dark text-larp-light font-sans min-h-screen flex flex-col justify-between">
   
@@ -52,7 +51,7 @@
       
       <div class="flex items-center gap-4 text-sm">
         {% if user.is_authenticated %}
-          <span class="text-larp-light/70">Greetings, <strong class="text-larp-light">{{ user.username }}</strong>!</span>
+          <span class="text-larp-light/70">Greetings, <a href="{%  url 'view_profile' id=user.id %}"> <strong class="text-larp-light hover:text-larp-gold transition-colors">{{ user.username }}</strong></a>!</span>
           <a href="{% url 'edit_profile' %}" class="hover:text-larp-gold transition-colors">Edit Profile</a>
           <a href="{% url 'create_listing' %}" class="text-sm font-medium hover:text-larp-gold transition-colors">Create Listing</a>
           <form action="{% url 'logout' %}" method="post" class="inline">
