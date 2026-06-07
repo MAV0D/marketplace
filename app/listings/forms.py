@@ -1,6 +1,6 @@
 from django import forms
-from .models import Listing
-from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
+from .models import Listing, EquipmentType
 
 class ListingForm(forms.ModelForm):
   class Meta:
@@ -15,6 +15,39 @@ class ListingForm(forms.ModelForm):
               'condition',
               'equipment_type',
             ]
+    
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    
+    if 'condition' in self.fields:
+      choices = list(self.fields['condition'].choices)
+      if choices and choices[0][0] == '':
+          choices[0] = ('', 'Select a condition...')
+      self.fields['condition'].choices = choices
+    
+    if 'equipment_type' in self.fields:
+      self.fields['equipment_type'].choices = self._get_category_choices()
+      
+  def _get_category_choices(self):
+    categories = EquipmentType.objects.all()
+    
+    children_map = {}
+    for cat in categories:
+      children_map.setdefault(cat.parent_id, []).append(cat)
+      
+    choices = [('', 'Select a category...')]
+    
+    def add_choices(parent_id, depth):
+      children = sorted(children_map.get(parent_id, []), key=lambda x: x.name)
+      for child in children:
+        spaces = "&nbsp;&nbsp;&nbsp;&nbsp;" * depth
+        choices.append((child.id, mark_safe(f"{spaces}{child.name}")))
+        
+        add_choices(child.id, depth + 1)
+        
+    add_choices(None, 0)
+    
+    return choices
     
   def clean(self):
     cleaned_data = super().clean()
