@@ -9,8 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import check_password
 from django.conf import settings
+from django.db.models import Avg, Count, Q
 from .forms import CustomUserCreationForm, UserProfileForm, ProfilePicture, ProfilePictureForm
 from listings.models import Listing
+from transactions.models import Transaction
 
 User = get_user_model()
 
@@ -85,9 +87,43 @@ def edit_profile(request):
   return render(request, 'users/edit_profile.html', {'user_form': user_form, 'pic_form' : pic_form})    
     
 def view_profile(request, id):
-  user = get_object_or_404(User, id = id)
-  listings = Listing.objects.filter(seller=user, status=Listing.Status.VISIBLE)
-  return render(request, "users/view_profile.html", {'shown_user' : user, 'listings':listings})
+  shown_user = get_object_or_404(User, id = id)
+  listings = Listing.objects.filter(seller=shown_user, status=Listing.Status.VISIBLE)
+  
+  buyer_stats = Transaction.objects.filter(
+    buyer=shown_user, 
+    buyer_rating__isnull=False
+  ).aggregate(avg=Avg('buyer_rating'), count=Count('buyer_rating'))
+  
+  seller_stats = Transaction.objects.filter(
+    listing__seller=shown_user, 
+    seller_rating__isnull=False
+  ).aggregate(avg=Avg('seller_rating'), count=Count('seller_rating'))
+  
+  total_rating_sum = 0
+  total_rating_count = 0
+  
+  if buyer_stats['avg'] and buyer_stats['count']:
+    total_rating_sum += buyer_stats['avg'] * buyer_stats['count']
+    total_rating_count += buyer_stats['count']
+    
+  if seller_stats['avg'] and seller_stats['count']:
+    total_rating_sum += seller_stats['avg'] * seller_stats['count']
+    total_rating_count += seller_stats['count']
+    
+  if total_rating_count > 0:
+    average_rating = round(total_rating_sum / total_rating_count, 1)
+  else:
+    average_rating = None
+  
+  context = {
+    'shown_user' : shown_user,
+    'listings':listings,
+    'average_rating': average_rating,
+    'rating_count': total_rating_count,
+  }
+  
+  return render(request, "users/view_profile.html", context)
 
 
 @login_required

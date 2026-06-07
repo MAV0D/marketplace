@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    
+    <div class="border-b border-larp-copper/20 pb-6">
+        <h1 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-tight">List of Transactions</h1>
+        <p class="mt-2 text-sm text-larp-light/60">Manage your transactions, mark them as complete and rate people you trade with.</p>
+    </div>
+
+    <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/20 shadow-xl space-y-4">
+        <h2 class="text-xl font-serif font-bold text-larp-gold uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-cart-shopping text-sm"></i> Bought Items
+        </h2>
+        <div class="overflow-x-auto rounded border border-larp-copper/10">
+            <table class="min-w-full divide-y divide-larp-copper/10 bg-larp-dark/30">
+                <thead class="bg-larp-dark/60 font-serif text-xs uppercase tracking-wider text-larp-copper">
+                    <tr>
+                        <th class="px-6 py-3 text-left">Item Name</th>
+                        <th class="px-6 py-3 text-left">Type</th>
+                        <th class="px-6 py-3 text-left">Price</th>
+                        <th class="px-6 py-3 text-left">Date</th>
+                        <th class="px-6 py-3 text-left">Status</th>
+                        <th class="px-6 py-3 text-right">Action</th>
+                        <th class="px-6 py-3 text-right">Your Rating</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-larp-copper/10">
+                    {% for tx in bought_transactions %}
+                        <tr id="tx-row-bought-{{ tx.id }}" class="hover:bg-larp-brown/40 transition-colors">
+                            {% include "transactions/partials/transaction_row.html" with tx=tx is_seller=False %}
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-sm text-larp-light/40 italic">You haven't made any purchases yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/20 shadow-xl space-y-4">
+        <h2 class="text-xl font-serif font-bold text-larp-gold uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-coins text-sm"></i> Sold Items
+        </h2>
+        <div class="overflow-x-auto rounded border border-larp-copper/10">
+            <table class="min-w-full divide-y divide-larp-copper/10 bg-larp-dark/30">
+                <thead class="bg-larp-dark/60 font-serif text-xs uppercase tracking-wider text-larp-copper">
+                    <tr>
+                        <th class="px-6 py-3 text-left">Item Name</th>
+                        <th class="px-6 py-3 text-left">Type</th>
+                        <th class="px-6 py-3 text-left">Price</th>
+                        <th class="px-6 py-3 text-left">Date</th>
+                        <th class="px-6 py-3 text-left">Status</th>
+                        <th class="px-6 py-3 text-right">Action</th>
+                        <th class="px-6 py-3 text-right">Your Rating</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-larp-copper/10">
+                    {% for tx in sold_transactions %}
+                        <tr id="tx-row-sold-{{ tx.id }}" class="hover:bg-larp-brown/40 transition-colors">
+                            {% include "transactions/partials/transaction_row.html" with tx=tx is_seller=True %}
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-sm text-larp-light/40 italic">No made any sales yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

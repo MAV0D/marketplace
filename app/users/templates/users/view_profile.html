@@ -28,6 +28,28 @@
         {{ shown_user.email }}
       </p>
 
+      <div class="w-full border-t border-larp-light/10 pt-4 mb-4 text-center">
+        {% if shown_user == user %}<a href="{% url 'transaction_dashboard' %}" class="block group">{% endif %}
+          <span class="block text-xs text-larp-light/40 uppercase tracking-wider font-semibold mb-1 group-hover:text-larp-gold transition-colors">
+            Reputation {% if shown_user == user %}<i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-1 opacity-50"></i>{% endif %}
+          </span>
+        {% if shown_user == user %}</a>{% endif %}
+        {% if average_rating %}
+          <div class="flex flex-col items-center justify-center gap-0.5">
+            <div class="flex items-center gap-1.5 text-larp-gold">
+              <i class="fa-solid fa-star text-base drop-shadow"></i>
+              <span class="text-lg font-serif font-bold tracking-wide">{{ average_rating }}</span>
+              <span class="text-xs text-larp-light/50">/ 5</span>
+            </div>
+            <span class="text-[10px] text-larp-light/40 font-mono tracking-tight">
+              Based on {{ rating_count }} rating{{ rating_count|pluralize }}
+            </span>
+          </div>
+        {% else %}
+          <p class="text-larp-light/30 italic text-xs py-0.5">No ratings recorded</p>
+        {% endif %}
+      </div>
+
       <div class="w-full border-t border-larp-light/10 pt-4 text-left">
         <span class="block text-xs text-larp-light/40 uppercase tracking-wider font-semibold mb-2">Biography</span>
         <div class="text-sm text-larp-light/80 leading-relaxed bg-larp-dark/40 p-3 rounded border border-larp-copper/10 min-h-[80px] break-words">

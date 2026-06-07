@@ -1,0 +1,102 @@
+<td class="px-6 py-4 whitespace-nowrap font-serif font-bold text-larp-light">{{ tx.listing.name }}</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-larp-light/70">
+  <span class="px-2 py-1 rounded text-xs uppercase font-mono bg-larp-dark border border-larp-copper/20">
+    {{ tx.get_type_display }}
+  </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-larp-copper font-bold">
+  {% if tx.type == 'SALE' %}{{ tx.listing.selling_price }}{% else %}{{ tx.listing.renting_price }}{% endif %} €
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-xs font-mono text-larp-light/40">{{ tx.date|date:"d. m. Y H:i" }}</td>
+
+{% with stat=tx.status %}
+
+<td class="px-6 py-4 whitespace-nowrap text-sm">
+  {% if stat == "PENDING" %}
+    <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-amber-600/20 text-amber-400 border border-amber-500/30">Pending</span>
+  {% elif stat == "CONFIRMED" %}
+    <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-blue-600/20 text-blue-400 border border-blue-500/30">Confirmed</span>
+  {% elif stat == "DONE" %}
+    <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-green-600/20 text-green-400 border border-green-500/30">Completed</span>
+  {% else %}
+    <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-larp-brown text-larp-light/40 border border-larp-copper/10">{{ stat }}</span>
+  {% endif %}
+</td>
+
+<td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+  {% if stat == "PENDING" and is_seller %}
+    <form hx-post="{% url 'change_transaction_status' tx.id %}" hx-target="closest tr" hx-swap="outerHTML" class="inline">
+      {% csrf_token %}
+      <button type="submit" class="bg-larp-gold text-larp-dark hover:bg-larp-light text-xs font-bold uppercase px-3 py-1.5 rounded shadow transition-colors cursor-pointer">
+        Accept Offer
+      </button>
+    </form>
+  {% elif stat == "CONFIRMED" and not is_seller %}
+    <form hx-post="{% url 'change_transaction_status' tx.id %}" hx-target="closest tr" hx-swap="outerHTML" class="inline">
+      {% csrf_token %}
+      <button type="submit" class="bg-green-700 text-larp-light hover:bg-green-600 text-xs font-bold uppercase px-3 py-1.5 rounded shadow transition-colors cursor-pointer">
+        Mark as Completed
+      </button>
+    </form>
+  {% else %}
+    <span class="text-xs text-larp-light/30 italic">No actions available</span>
+  {% endif %}
+</td>
+
+<td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+  {% if stat == "DONE" %}
+    <div id="rating-container-{{ tx.id }}" class="inline-block">
+      
+      {% if is_seller %}
+        {% if tx.buyer_rating %}
+          {% include "transactions/partials/rating_display.html" with rating=tx.buyer_rating %}
+        {% else %}
+          <form class="inline-block">
+              {% csrf_token %}
+              <div class="flex flex-row-reverse gap-1 justify-end group/stars">
+                {% for i in "54321" %}
+                  <button type="button" 
+                          hx-post="{% url 'rate_transaction' tx.id %}" 
+                          hx-target="#rating-container-{{ tx.id }}" 
+                          hx-swap="outerHTML" 
+                          hx-include="closest form"
+                          hx-vals='{"rating": "{{ i }}"}'
+                          class="fa-regular fa-star text-xs text-larp-light/30 hover:text-larp-gold peer hover:~peer/stars:fa-solid hover:~peer/stars:text-larp-gold peer-hover:fa-solid peer-hover:text-larp-gold cursor-pointer transition-colors" 
+                          title="Rate {{ i }} stars">
+                  </button>
+                {% endfor %}
+              </div>
+          </form>
+        {% endif %}
+        
+      {% else %}
+        {% if tx.seller_rating %}
+          {% include "transactions/partials/rating_display.html" with rating=tx.seller_rating %}
+        {% else %}
+          <form class="inline-block">
+              {% csrf_token %}
+              <div class="flex flex-row-reverse gap-1 justify-end group/stars">
+                {% for i in "54321" %}
+                  <button type="button" 
+                          hx-post="{% url 'rate_transaction' tx.id %}" 
+                          hx-target="#rating-container-{{ tx.id }}" 
+                          hx-swap="outerHTML" 
+                          hx-include="closest form"
+                          hx-vals='{"rating": "{{ i }}"}'
+                          class="fa-regular fa-star text-xs text-larp-light/30 hover:text-larp-gold peer hover:~peer/stars:fa-solid hover:~peer/stars:text-larp-gold peer-hover:fa-solid peer-hover:text-larp-gold cursor-pointer transition-colors" 
+                          title="Rate {{ i }} stars">
+                  </button>
+                {% endfor %}
+              </div>
+          </form>
+        {% endif %}
+      {% endif %}
+      
+    </div>
+  {% else %}
+    <span class="text-xs text-larp-light/20 italic flex items-center justify-end gap-1 select-none">
+      <i class="fa-solid fa-lock text-[10px]"></i> Rates after completion
+    </span>
+  {% endif %}
+</td>
+{% endwith %}
