@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from django.conf import settings
 from datetime import datetime
+import json
 from listings.models import Listing
 from .models import Transaction
 
@@ -19,6 +20,21 @@ def order_review(request, listing_id, order_type):
   
   order_type = int(order_type)
   
+  disabled_dates = []
+  if order_type == 1:
+    unavailable_periods = Transaction.objects.filter(
+      listing=listing,
+      type=Transaction.Type.RENTAL
+    ).exclude(status=[Transaction.Status.CANCELLED, Transaction.Status.PENDING])
+    
+    for period in unavailable_periods:
+      if period.start_date and period.end_date:
+        disabled_dates.append({
+          "from": period.start_date.strftime("%Y-%m-%d"),
+          "to": period.end_date.strftime("%Y-%m-%d")
+        })
+
+  
   if request.method == "POST":
     new_transaction = Transaction(
       type = Transaction.Type.RENTAL if order_type else Transaction.Type.SALE,
@@ -31,14 +47,29 @@ def order_review(request, listing_id, order_type):
       
       if date_range and " to " in date_range:
         start_date_str, end_date_str = date_range.split(" to ")
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+        overlapping = Transaction.objects.filter(
+          listing=listing,
+          type=Transaction.Type.RENTAL,
+          start_date__lte=end_date,
+          end_date__gte=start_date
+        ).exclude(status=[Transaction.Status.CANCELLED, Transaction.Status.PENDING]).exists()
         
-        new_transaction.start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-        new_transaction.end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        if overlapping:
+          messages.error(request, "The selected dates overlap with unavailable days.")
+          return redirect('order_review', listing_id=listing.id, order_type=order_type)
+
+        
+        new_transaction.start_date = start_date
+        new_transaction.end_date = end_date
       else:
         messages.error(request, "You must enter valid date range (YYYY-MM-DD to YYYY-MM-DD).")
         return render(request, 'transactions/order_page.html', {
           'listing': listing, 
           'order_type': order_type,
+          'disabled_dates_json': json.dumps(disabled_dates),
         })
       
     new_transaction.save()
@@ -47,13 +78,10 @@ def order_review(request, listing_id, order_type):
       listing.status = Listing.Status.SOLD
       listing.save()
     
-    token = transaction_token_generator.make_token(new_transaction)
-    uid = urlsafe_base64_encode(force_bytes(new_transaction.pk))
-    
     current_site = request.get_host()
     if not settings.DEBUG:
       current_site += "/marketplace"
-    activation_link = f"http://{current_site}/transactions/complete-transaction/{uid}/{token}/"
+    dashboard_link = f"http://{current_site}/transactions/dashboard/"
 
     
     subject = 'Somebody purchased your item!'
@@ -131,5 +159,3 @@ def rate_transaction(request, transaction_id):
     })
     
 from django.views.decorators.http import require_POST
-
-

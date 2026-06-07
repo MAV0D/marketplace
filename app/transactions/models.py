@@ -9,6 +9,7 @@ class Transaction(models.Model):
     DONE = 'DONE', 'Done'
     RATED = 'RATED', 'Rated'
     CANCELLED = 'CANCELLED', 'Cancelled'
+    BLOCKED = 'BLOCKED', 'Blocked by Seller'
     
   class Type(models.TextChoices):
     RENTAL = 'RENTAL', 'Rental'

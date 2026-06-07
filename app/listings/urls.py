@@ -11,4 +11,7 @@ urlpatterns = [
   path('image/<int:id>/set-main/', views.set_main_image, name='set_main_image'),
   path('image/<int:id>/move/<str:direction>/', views.move_image, name='move_image'),
   path('get-attributes/', views.get_attributes_for_category, name='get_attributes_for_category'),
+  path('block/<int:listing_id>/', views.seller_block_dates, name='seller_block_dates'),
+  path('manage_availability/<int:listing_id>/', views.manage_availability, name='manage_availability'),
+  path('cancel_blockage/<int:transaction_id>/', views.cancel_blockage, name='cancel_blockage'),
 ]

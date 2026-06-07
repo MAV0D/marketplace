@@ -5,9 +5,12 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.http import HttpResponse
 from django.urls import reverse
+import json
+from datetime import datetime
 from .models import Listing, EquipmentType, ListingAttribute, FilterValue
 from .forms import ListingForm
 from images.models import ListingImage
+from transactions.models import Transaction
 
 def detail(request, id):
   listing = get_object_or_404(Listing, id = id)
@@ -297,10 +300,8 @@ def get_attributes_for_category(request):
     for attr in existing_attrs:
       existing_values[attr.value.attribute_id] = attr.value_id
       
-      # NEW: Check if numeric, and pass the browser-safe number format
       if attr.value.attribute.is_numeric and attr.value.numeric_value is not None:
         num = attr.value.numeric_value
-        # If it's a whole number (15.0), strip the decimal for a cleaner UI (15)
         existing_text_values[attr.value.attribute_id] = int(num) if num.is_integer() else num
       else:
         existing_text_values[attr.value.attribute_id] = attr.value.value
@@ -312,3 +313,74 @@ def get_attributes_for_category(request):
   }
   
   return render(request, 'listings/partials/attributes_form_fields.html', context)
+
+@login_required
+def manage_availability(request, listing_id):
+  listing = get_object_or_404(Listing, id=listing_id)
+  
+  if listing.seller != request.user:
+    return HttpResponse("Unauthorized", status=403)
+
+  blocked_transactions = Transaction.objects.filter(
+    listing=listing,
+    status=Transaction.Status.BLOCKED,
+    end_date__gte=datetime.now().date()
+  ).order_by('start_date')
+
+  disabled_dates = []
+  unavailable_periods = Transaction.objects.filter(
+    listing=listing,
+    type=Transaction.Type.RENTAL
+  ).exclude(status=Transaction.Status.CANCELLED)
+
+  for period in unavailable_periods:
+    if period.start_date and period.end_date:
+      disabled_dates.append({
+        "from": period.start_date.strftime("%Y-%m-%d"),
+        "to": period.end_date.strftime("%Y-%m-%d")
+      })
+
+  return render(request, 'listings/manage_availability.html', {
+    'listing': listing,
+    'blocked_transactions': blocked_transactions,
+    'disabled_dates_json': json.dumps(disabled_dates)
+  })
+  
+@login_required
+@require_POST
+def seller_block_dates(request, listing_id):
+  listing = get_object_or_404(Listing, id=listing_id)
+  
+  if listing.seller != request.user:
+    return HttpResponse("Unauthorized", status=403)
+    
+  date_range = request.POST.get('date_range')
+  if date_range and " to " in date_range:
+    start_date_str, end_date_str = date_range.split(" to ")
+    
+    Transaction.objects.create(
+      type=Transaction.Type.RENTAL,
+      status=Transaction.Status.BLOCKED,
+      buyer=request.user,
+      listing=listing,
+      start_date=datetime.strptime(start_date_str, "%Y-%m-%d").date(),
+      end_date=datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    )
+    messages.success(request, "Dates successfully blocked.")
+  else:
+    messages.error(request, "Invalid date format.")
+    
+  return redirect('manage_availability', listing_id=listing.id)
+
+@login_required
+@require_POST
+def cancel_blockage(request, transaction_id):
+  transaction = get_object_or_404(Transaction, id=transaction_id)
+  
+  if transaction.listing.seller == request.user and transaction.status == Transaction.Status.BLOCKED:
+    transaction.delete()
+    messages.success(request, "Blockage removed successfully.")
+  else:
+    return HttpResponse("Unauthorized", status=403)
+    
+  return redirect('manage_availability', listing_id=transaction.listing.id)

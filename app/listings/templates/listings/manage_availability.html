@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Availability | {{ listing.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+  
+  <div class="border-b border-larp-copper/20 pb-6">
+    <h1 class="text-3xl font-serif font-bold text-larp-light uppercase tracking-tight">Manage Availability -- <a href={% url 'listing_detail' listing.id %}>{{ listing.name }}</a></h1>
+    <p class="mt-2 text-sm text-larp-light/60">Block specific dates for <span class="text-larp-gold font-bold"><a href={% url 'listing_detail' listing.id %}>{{ listing.name }}</a></span> or remove existing restrictions.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/20 shadow-xl space-y-4">
+      <h2 class="text-xl font-serif font-bold text-larp-gold uppercase tracking-wider flex items-center gap-2">
+        <i class="fa-solid fa-calendar-plus text-sm"></i> Add New Blockage
+      </h2>
+      
+      <form method="post" action="{% url 'seller_block_dates' listing.id %}" class="space-y-6">
+        {% csrf_token %}
+        
+        <div class="space-y-2 flex flex-col items-center">
+          <p class="text-sm text-larp-light/70 self-start mb-2">Select a date range on the calendar below:</p>
+          
+          <div id="calendar_wrapper" class="bg-larp-dark/50 p-2 rounded-lg border border-larp-copper/20 shadow-inner w-full flex justify-center overflow-hidden"></div>
+          <input type="text" id="date_range" name="date_range" class="hidden" required>
+          
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const disabledDates = {{ disabled_dates_json|safe|default:"[]" }};
+
+              flatpickr("#date_range", {
+                mode: "range",
+                inline: true,
+                appendTo: document.getElementById("calendar_wrapper"),
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                disable: disabledDates,
+                "locale": {
+                  "firstDayOfWeek": 1
+                }
+              });
+            });
+          </script>
+
+        </div>
+
+        <button type="submit" class="w-full bg-larp-gold text-larp-dark hover:bg-larp-light font-bold text-sm uppercase py-3 rounded shadow tracking-wider transition-colors duration-200">
+          Block Selected Dates
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-larp-brown p-6 rounded-lg border border-larp-copper/20 shadow-xl space-y-4">
+      <h2 class="text-xl font-serif font-bold text-larp-gold uppercase tracking-wider flex items-center gap-2">
+        <i class="fa-solid fa-calendar-xmark text-sm"></i> Future Blockages
+      </h2>
+      
+      <div class="overflow-x-auto rounded border border-larp-copper/10">
+        <table class="min-w-full divide-y divide-larp-copper/10 bg-larp-dark/30">
+          <thead class="bg-larp-dark/60 font-serif text-xs uppercase tracking-wider text-larp-copper">
+            <tr>
+              <th class="px-6 py-3 text-left">Start Date</th>
+              <th class="px-6 py-3 text-left">End Date</th>
+              <th class="px-6 py-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-larp-copper/10">
+            {% for block in blocked_transactions %}
+              <tr class="hover:bg-larp-brown/40 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-larp-light">{{ block.start_date|date:"d. m. Y" }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-larp-light">{{ block.end_date|date:"d. m. Y" }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <form method="post" action="{% url 'cancel_blockage' block.id %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-xs font-bold uppercase text-red-500 hover:text-red-400 tracking-wider transition-colors">
+                      <i class="fa-solid fa-trash-can mr-1"></i> Remove
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3" class="px-6 py-12 text-center text-sm text-larp-light/40 italic">
+                  No dates are currently blocked.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-larp-light/40 mt-2">
+        <i class="fa-solid fa-circle-info mr-1"></i> Note: This table only shows manually blocked dates, not actual active customer rentals.
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

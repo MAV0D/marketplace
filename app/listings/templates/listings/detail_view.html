@@ -144,6 +144,9 @@
                 <a href="{% url 'edit_listing' listing.id %}" class="w-full text-center bg-larp-copper text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2" title="Edit Listing">
                   <span>Edit!</span>
                 </a>
+                <a href="{% url 'manage_availability' listing.id %}" class="w-full text-center bg-larp-copper text-larp-dark hover:bg-larp-light font-serif font-bold text-lg px-6 py-3.5 rounded-full shadow-lg transform transition active:scale-95 tracking-wide inline-flex items-center justify-center gap-2" title="Manage availability">
+                  <span>Manage availability of listing</span>
+                </a>
               </div>
             {% endif %}
           </div>
