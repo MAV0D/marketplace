@@ -26,13 +26,16 @@
       <h2 class="text-2xl font-serif font-bold text-larp-light tracking-wide truncate max-w-full mb-1">
         {{ shown_user.username }}
       </h2>
-      <p class="text-xs text-larp-light/40 font-mono mb-4 truncate max-w-full">
+      <p class="text-xs text-larp-light/80 font-mono mb-4 truncate max-w-full">
         {{ shown_user.email }}
+      </p>
+      <p class="text-xs text-larp-light/80 font-mono mb-4 truncate max-w-full">
+        {{ shown_user.location }}
       </p>
 
       <div class="w-full border-t border-larp-light/10 pt-4 mb-4 text-center">
         {% if shown_user == user %}<a href="{% url 'transaction_dashboard' %}" class="block group">{% endif %}
-          <span class="block text-xs text-larp-light/40 uppercase tracking-wider font-semibold mb-1 group-hover:text-larp-gold transition-colors">
+          <span class="block text-xs text-larp-light/80 uppercase tracking-wider font-semibold mb-1 group-hover:text-larp-gold transition-colors">
             Reputation {% if shown_user == user %}<i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-1 opacity-50"></i>{% endif %}
           </span>
         {% if shown_user == user %}</a>{% endif %}
@@ -43,7 +46,7 @@
               <span class="text-lg font-serif font-bold tracking-wide">{{ average_rating }}</span>
               <span class="text-xs text-larp-light/50">/ 5</span>
             </div>
-            <span class="text-[10px] text-larp-light/40 font-mono tracking-tight">
+            <span class="text-[10px] text-larp-light/80 font-mono tracking-tight">
               Based on {{ rating_count }} rating{{ rating_count|pluralize }}
             </span>
           </div>
@@ -53,7 +56,7 @@
       </div>
 
       <div class="w-full border-t border-larp-light/10 pt-4 text-left">
-        <span class="block text-xs text-larp-light/40 uppercase tracking-wider font-semibold mb-2">Biography</span>
+        <span class="block text-xs text-larp-light/80 uppercase tracking-wider font-semibold mb-2">Biography</span>
         <div class="text-sm text-larp-light/80 leading-relaxed bg-larp-dark/40 p-3 rounded border border-larp-copper/10 min-h-[80px] break-words">
           {% if shown_user.profile_description %}
             {{ shown_user.profile_description|linebreaks }}
@@ -64,7 +67,7 @@
       </div>
 
       <div class="w-full mt-6 text-center border-t border-larp-light/5 pt-3">
-        <p class="text-[10px] text-larp-light/40 font-mono uppercase tracking-widest">
+        <p class="text-[10px] text-larp-light/80 font-mono uppercase tracking-widest">
           Account created: {{ shown_user.date_joined|date:"d. m. Y" }}
         </p>
       </div>
@@ -84,7 +87,7 @@
               </div>
             {% empty %}
               <div class="w-full py-12 text-center bg-larp-dark/20 border border-dashed border-larp-copper/20 rounded-lg">
-                <p class="text-sm text-larp-light/40 italic">You have no active listings.</p>
+                <p class="text-sm text-larp-light/80 italic">You have no active listings.</p>
               </div>
             {% endfor %}
           </div>
