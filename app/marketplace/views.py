@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from django.db.models import Q
+from django.http import HttpResponse
 from listings.models import Listing, EquipmentType, FilterAttribute
 
 def index(request):
@@ -99,3 +100,9 @@ def index(request):
     'active_numeric_filters': active_numeric_filters,
   }
   return render(request, 'index.html', context)
+
+@require_POST
+def accept_cookies(request):
+  response = HttpResponse("")
+  response.set_cookie('cookies_accepted', 'true', max_age=31536000) # one year
+  return response

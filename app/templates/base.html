@@ -75,17 +75,24 @@
     {% block content %}{% endblock %}
   </main>
 
-  <aside id="info-banner" class="hidden fixed bottom-0 left-0 w-full bg-larp-brown border-t border-larp-copper/30 text-larp-light p-4 text-center z-50 shadow-2xl" aria-label="Cookie consent banner">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4">
-      <p class="text-sm text-larp-light/80 m-0">This website runs only on mandatory functional cookies and cannot operate without them.</p>
-      <button id="accept-banner-btn" class="bg-larp-gold text-larp-dark hover:bg-larp-light hover:text-larp-dark font-bold text-xs uppercase px-4 py-2 rounded shadow transition-all duration-200 tracking-wider">
-        Accept
-      </button>
-    </div>
-  </aside>
+  {% if not request.COOKIES.cookies_accepted %}
+    <aside id="info-banner" class="fixed bottom-0 left-0 w-full bg-larp-brown border-t border-larp-copper/30 text-larp-light p-4 text-center z-50 shadow-2xl" aria-label="Cookie consent banner">
+      <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4">
+        <p class="text-sm text-larp-light/80 m-0">This website runs only on mandatory functional cookies and cannot operate without them.</p>
+        
+        <button hx-post="{% url 'accept_cookies' %}" 
+                hx-target="#info-banner" 
+                hx-swap="outerHTML"
+                class="bg-larp-gold text-larp-dark hover:bg-larp-light hover:text-larp-dark font-bold text-xs uppercase px-4 py-2 rounded shadow transition-all duration-200 tracking-wider">
+          Accept
+        </button>
+        
+      </div>
+    </aside>
+  {% endif %}
 
   <footer class="bg-larp-brown/40 border-t border-larp-copper/10 py-6 text-center text-xs text-larp-light/40">
-    <p>&copy; 2026 Vojtech Zmatlo. All chronicles reserved.</p>
+    <p>&copy; 2026 Vojtech Zmatlo</p>
   </footer>
 </body>
 </html>

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import index
+from .views import index, accept_cookies
 
 urlpatterns = [
   path('admin/', admin.site.urls),
@@ -26,6 +26,7 @@ urlpatterns = [
   path('users/', include('users.urls')),
   path('transactions/', include('transactions.urls')),
   path('', index, name='index'),
+  path('accept_cookies/', accept_cookies, 'accept_cookies'),
 ]
 
 if settings.DEBUG:
