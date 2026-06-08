@@ -81,7 +81,8 @@
         <p class="text-sm text-larp-light/80 m-0">This website runs only on mandatory functional cookies and cannot operate without them.</p>
         
         <button hx-post="{% url 'accept_cookies' %}" 
-                hx-target="#info-banner" 
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-target="#info-banner"
                 hx-swap="outerHTML"
                 class="bg-larp-gold text-larp-dark hover:bg-larp-light hover:text-larp-dark font-bold text-xs uppercase px-4 py-2 rounded shadow transition-all duration-200 tracking-wider">
           Accept
