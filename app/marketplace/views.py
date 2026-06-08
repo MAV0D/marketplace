@@ -2,6 +2,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from django.db.models import Q
 from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 from listings.models import Listing, EquipmentType, FilterAttribute
 
 def index(request):
