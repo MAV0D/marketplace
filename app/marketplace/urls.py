@@ -26,7 +26,7 @@ urlpatterns = [
   path('users/', include('users.urls')),
   path('transactions/', include('transactions.urls')),
   path('', index, name='index'),
-  path('accept_cookies/', accept_cookies, 'accept_cookies'),
+  path('accept_cookies/', accept_cookies, name='accept_cookies'),
 ]
 
 if settings.DEBUG:
