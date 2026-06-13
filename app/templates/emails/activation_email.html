@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Activate Your Account</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #1A1A1A; font-family: 'Times New Roman', Times, serif; color: #E0DCD3;">
+  
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #1A1A1A; font-family: 'Times New Roman', Times, serif;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; text-align: center;">
+          <tr>
+            <td style="color: #E0DCD3; font-size: 18px; line-height: 1.6; padding-bottom: 30px;">
+              <h2 style="color: #D4AF37; font-size: 28px; margin-top: 0;">Hello {{ username }},</h2>
+              <p style="margin: 0 0 20px 0;">To activate your account and complete registration, click the button below:</p>
+            </td>
+          </tr>
+          
+          <tr>
+            <td align="center" style="padding-bottom: 40px;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" bgcolor="#D4AF37" style="border-radius: 50px; -webkit-border-radius: 50px; -moz-border-radius: 50px;">
+                    <a href="{{ activation_url }}" target="_blank" style="font-family: 'Times New Roman', Times, serif; font-size: 18px; font-weight: bold; color: #1A1A1A; text-decoration: none; padding: 14px 32px; border-radius: 50px; -webkit-border-radius: 50px; -moz-border-radius: 50px; display: inline-block; border: 1px solid #D4AF37; white-space: nowrap;">
+                      Activate account!
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <tr>
+            <td style="color: #E0DCD3; font-size: 14px; opacity: 0.8; line-height: 1.4;">
+              <p style="margin: 0 0 10px 0;">If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="margin: 0; word-break: break-all;"><a href="{{ activation_url }}" style="color: #D4AF37; text-decoration: underline;">{{ activation_url }}</a></p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

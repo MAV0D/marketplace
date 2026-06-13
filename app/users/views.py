@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
@@ -9,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import check_password
 from django.conf import settings
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count
 from .forms import CustomUserCreationForm, UserProfileForm, ProfilePicture, ProfilePictureForm
 from listings.models import Listing
 from transactions.models import Transaction
@@ -30,19 +32,33 @@ def register(request):
       current_site = request.get_host()
       if not settings.DEBUG:
         current_site += "/marketplace"
-      activation_link = f"http://{current_site}/users/activate/{uid}/{token}/"
+      activation_link = f"https://{current_site}/users/activate/{uid}/{token}/"
       
-      subject = 'Activate your account on the LARP Marketplace!'
-      message = f"Hello {user.username},\n\nTo complete your registration, click following link:\n{activation_link}"
+      send_verification_email(user.email, user.username, activation_link)
       
-      send_mail(subject, message, 'noreply@server2.zmatlo.cz', [user.email])
-      
-      messages.info(request, 'First step of registration successful. Check your email inbox for confirmation link. ')
+      messages.info(request, 'First step of registration successful. Check your email inbox for confirmation link. If the mail doesn\'t arrive, please check spam folder.')
       return redirect('login')
   else:
     form = CustomUserCreationForm()
       
   return render(request, 'users/register.html', {'form': form})
+
+def send_verification_email(user_email, username, activation_url):
+  subject = "Activate your account on the LARP Marketplace!"
+  from_email = "noreply@server2.zmatlo.cz"
+  to = [user_email]
+
+  context = {
+    'username': username,
+    'activation_url': activation_url,
+  }
+
+  html_content = render_to_string('emails/activation_email.html', context)
+  text_content = strip_tags(html_content)
+
+  msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+  msg.attach_alternative(html_content, "text/html")
+  msg.send()
 
 def activate_account(request, uidb64, token):
   try:
